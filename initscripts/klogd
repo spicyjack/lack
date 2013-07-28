@@ -1,0 +1,71 @@
+#!/bin/sh
+
+# $Id: klogd,v 1.13 2009-05-13 07:34:26 brian Exp $
+# Copyright (c)2008 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+# this file will get touched if we're running in debug mode; this script will
+# have already been run
+# commenting this out for now, it's been commented out in the debug section of
+# the init script
+#if [ -e /var/log/debug.env.state ]; then exit 0; fi
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BINARY=/sbin/klogd
+[ -x "$BINARY" ] || exit 1
+DESC="kernel logger daemon"
+BASENAME=$(/usr/bin/basename $BINARY)
+# 0 = unstable, 1 = immediate, 2 = critical, 3 = error, 4 = warning
+# 5 = normal, 6 = info, 7 = debug
+KERNEL_LOG_LEVEL=4
+BINARY_OPTS="-c ${KERNEL_LOG_LEVEL}"
+
+case "$1" in
+  vars)
+    echo "${BASENAME}:"
+    exit 0
+  ;;
+  start)
+    colorize $S_TIP "${BASENAME}: Starting $DESC;"
+    $BINARY $BINARY_OPTS
+    KLOGD_STATUS=$?
+    # get_pid sets $CHILD_PID
+    get_pid $BINARY
+    write_child_pid $BASENAME $CHILD_PID
+    if [ $KLOGD_STATUS -eq 0 ]; then
+        colorize $S_SUCCESS "$SUCCESS"
+        echo " (PID=${CHILD_PID}, loglevel='${KERNEL_LOG_LEVEL}')"
+    else
+        colorize_nl $S_FAILURE "$FAILED"
+        colorize $S_FAILURE "klogd exited with status code $KLOGD_STATUS"
+    fi # if [ $KLOGD_STATUS -eq 0 ]
+    ;;
+  stop)
+    PATH=/bin:/sbin:/usr/bin:/usr/sbin
+    KLOGD_PID=$(cat /var/run/${BASENAME}.pid)
+    colorize $S_TIP "${BASENAME}: Stopping $DESC "
+    echo -n "(PID=${KLOGD_PID});"
+    /bin/kill -TERM $KLOGD_PID
+    check_exit_status $? $BASENAME
+    ;;
+  restart|force-reload)
+     $0 stop
+     $0 start
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

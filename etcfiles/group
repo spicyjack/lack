@@ -1,0 +1,16 @@
+root:x:0:
+tty:x:5:
+disk:x:6:
+lp:x:7:
+kmem:x:15:
+dialout:x:20:
+cdrom:x:24:lack
+floppy:x:25:lack
+tape:x:26:
+audio:x:29:lack
+utmp:x:43:
+video:x:44:lack
+icecast:x:110:
+lack:x:1000:
+nogroup:x:65535:
+

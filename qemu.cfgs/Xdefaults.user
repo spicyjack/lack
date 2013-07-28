@@ -1,0 +1,81 @@
+! comments are marked with an exclamation point at the beginning of the line
+#ifdef COLOR
+*customization: -color
+#endif
+
+! mrxvt settings (mrxvt == multi-tab rxvt)
+! size
+mrxvt*geometry: 80x25
+! settings to do with special features
+mrxvt*tabTitle: "mrxvt"
+mrxvt*saveLines: 2000
+mrxvt*scrollTtyOutputInhibit: True
+mrxvt*scrollTtyKeypress: True
+mrxvt*bottomTabbar: False
+! transparency and fading
+mrxvt*transparent: True
+mrxvt*backgroundFade: 50
+mrxvt*fading: 0
+mrxvt*transparentScrollbar: True
+mrxvt*transparentTabbar: True
+! colors
+mrxvt*foreground: #ffffff
+mrxvt*background: #000000
+mrxvt*cursorColor: #ff0000
+mrxvt*tabForeground: #0000ff
+mrxvt*iTabForeground: #2f4f4f
+! fonts
+!mrxvt*font: -xos4-terminus-bold-r-normal--24-240-72-72-c-120-iso10646-1
+!mrxvt*xft: True
+mrxvt*font: -xos4-terminus-bold-r-normal--14-*-*-*-*-*-iso10646-1
+!mrxvt*mfont: -xos4-terminus-bold-r-normal--14-*-*-*-*-*-iso10646-1
+!mrxvt*font: -xos4-terminus-bold-r-normal--20-200-72-72-c-100-iso10646-1
+!mrxvt*font: -xos4-terminus-bold-r-normal--24-240-72-72-c-100-iso10646-16
+!mrxvt*font: lucidasanstypewriter-18
+!mrxvt*xftPFont: lucidasanstypewriter-18
+
+! rxvt settings
+!rxvt*background: Black
+!rxvt*foreground: White
+!rxvt*cursorColor: Red
+!rxvt*font: -misc-*-*-*-*-*-20-*-*-*-*-*-iso10646-*
+!rxvt*saveLines: 2000
+!rxvt*geometry: 80x25
+!rxvt-full*font: -xos4-terminus-bold-r-normal--24-240-72-72-c-120-iso10646-1
+!rxvt-full*font: -xos4-terminus-bold-r-normal--20-200-72-72-c-100-iso10646-1
+! good on 1200x1024 displays
+!Rxvt*font: -xos4-terminus-bold-r-normal--24-240-72-72-c-120-iso10646-1
+! good on 1024x768 displays
+!Rxvt*font: -xos4-terminus-*-r-normal--20-200-72-72-c-100-iso10646-1
+! good on 800x600 displays
+!Rxvt*font: -xos4-terminus-*-r-normal--17-120-100-100-c-0-iso10646-1
+
+xterm*background: Black
+xterm*foreground: White
+xterm*cursorColor: Red
+xterm*reverseVideo: false
+xterm*scrollBar: true
+xterm*saveLines: 2000
+xterm*reverseWrap: true
+xterm*font: -*-*-*-*-*-*-14-*-*-*-*-*-koi8-*
+!term*font: 9x15
+!Xterm*font: 9x15
+xterm*fullCursor: true
+xterm*scrollTtyOutput: off
+xterm*scrollKey: on
+xterm*VT100.Translations: #override\n\
+	<KeyPress>Prior : scroll-back(1,page)\n\
+	<KeyPress>Next : scroll-forw(1,page)
+xterm*titleBar: false
+xterm*geometry: 80x25
+
+!urxvt
+!URxvt*background: Black
+!URxvt*foreground: White
+!URxvt*cursorColor: Red
+!URxvt*font: -misc-*-*-*-*-*-20-*-*-*-*-*-iso10646-*
+!URxvt*saveLines: 2000
+!URxvt*geometry: 80x25
+
+ptkdb*scrollbars:se
+! vim: ft=xdefaults sw=4 ts=4:

@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# $Id: hostname,v 1.3 2009-07-16 00:23:49 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+# picks up things like colorize()
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BINARY=/bin/hostname
+[ -x "$BINARY" ] || exit 1
+BASENAME=$(/usr/bin/basename $BINARY)
+DESC="$BASENAME: Setting hostname to"
+BINARY_OPTS="-r -c"
+
+case "$ACTION" in
+  vars)
+    # echo out what commandline variables are parsed by this script
+    echo "${BASENAME}:"
+    exit 0
+  ;;
+  start)
+    get_hostname # from ant_functions
+    colorize $S_TIP "$DESC $HOSTNAME"
+    $BINARY $HOSTNAME
+    check_exit_status $? $BASENAME
+    ;;
+  stop)
+    colorize $INFO "Stopping $DESC"
+    check_exit_status $? $BASENAME
+    ;;
+  restart|force-reload)
+     $0 stop
+     $0 start
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

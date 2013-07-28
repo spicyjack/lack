@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# default udhcpc script, run when a DHCP event occurs
+
+# don't do anything for now, exit nicely
+exit 0

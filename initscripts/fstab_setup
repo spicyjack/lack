@@ -1,0 +1,60 @@
+#!/bin/sh
+
+# $Id: _initscript_stub.sh,v 1.7 2009-07-23 22:05:47 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+# picks up things like colorize()
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BASENAME="fstab_setup"
+DESC="/etc/fstab setup script"
+
+file_parse "/proc/cmdline" "prompt"
+PROMPT=$PARSED
+
+case "$ACTION" in
+  vars)
+    # echo out what commandline variables are parsed by this script
+    echo "${BASENAME}:"
+    exit 0
+  ;;
+  start)
+    colorize_nl $S_TIP "${BASENAME}: ${DESC}"
+    if [ -e /etc/fstab.${PROMPT} ]; then
+        colorize $S_TIP "${BASENAME}: Using key ID ${PROMPT}"
+        /bin/ln /etc/fstab.${PROMPT} /etc/fstab
+        check_exit_status $? $BASENAME
+    elif [ -e /etc/fstab.initramfs ]; then
+        colorize $S_TIP "${BASENAME}: Using fstab.initramfs file"
+        /bin/ln /etc/fstab.initramfs /etc/fstab
+        check_exit_status $? $BASENAME
+    else
+        echo
+        colorize_nl $S_FAILURE "${BASENAME}: /etc/fstab.${PROMPT} not found"
+        exit 1
+    fi
+    ;;
+  stop)
+    colorize $S_TIP "${BASENAME}: Stopping ${DESC}"
+    ;;
+  restart|force-reload)
+     $0 stop
+     $0 start
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

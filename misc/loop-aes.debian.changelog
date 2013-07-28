@@ -1,0 +1,812 @@
+loop-aes (3.6h-0) unstable; urgency=low
+
+  * New upstream release
+
+ -- Brian Manning <brian@xaoc.org>  Sun, 05 May 2013 22:39:41 -0700
+
+loop-aes (3.6g-0) unstable; urgency=low
+
+  * New upstream release
+
+ -- Brian Manning <brian@xaoc.org>  Sat, 08 Dec 2012 09:30:44 -0800
+
+loop-aes (3.6f-0) unstable; urgency=low
+
+  * New upstream release
+
+ -- Brian Manning <brian@xaoc.org>  Wed, 14 Nov 2012 23:26:09 -0800
+
+loop-aes (3.6e-0) unstable; urgency=low
+
+  * New upstream release
+
+ -- Brian Manning <brian@xaoc.org>  Tue, 27 Mar 2012 13:08:29 -0700
+
+loop-aes (3.6c-0) unstable; urgency=low
+
+  * New upstream release
+
+ -- Brian Manning <brian@portaboom.com>  Thu, 21 Jul 2011 05:53:10 -0700
+
+loop-aes (3.6b-0) unstable; urgency=low
+
+  * New upstream release
+
+ -- Brian Manning <brian@portaboom.com>  Wed, 06 Apr 2011 17:39:43 -0700
+
+loop-aes (3.3a-1) unstable; urgency=low
+
+  * New upstream release
+  * Switch to 3.0 (quilt) format for upstream .tar.bz2
+  * Update Standards-Version to 3.8.4 (no changes)
+
+ -- Max Vozeler <xam@debian.org>  Mon, 29 Mar 2010 19:04:20 +0200
+
+loop-aes (3.2h-1) unstable; urgency=low
+
+  * New upstream release
+    - Fixes build with 2.6.32 (closes: #560214)
+  * Update Standards-Version to 3.8.3 (no changes)
+  * Add copyright info for loop-aes-keygen (closes: #492123)
+
+ -- Max Vozeler <xam@debian.org>  Sat, 12 Dec 2009 14:37:51 +0100
+
+loop-aes (3.2g-1) unstable; urgency=low
+
+  * New upstream release
+  * Set section to 'kernel' 
+  * Update Standards-Version to 3.8.1 (no changes)
+  * Update to debhelper level 7
+
+ -- Max Vozeler <xam@debian.org>  Fri, 03 Jul 2009 20:42:10 +0200
+
+loop-aes (3.2f-1) unstable; urgency=low
+
+  * New upstream release
+    - Fixes build with 2.6.29 (closes: #521348)
+  * debian/copyright: Update years
+
+ -- Max Vozeler <xam@debian.org>  Sun, 29 Mar 2009 14:02:13 +0200
+
+loop-aes (3.2e-1) unstable; urgency=low
+
+  * New upstream release
+   - Fixes build with 2.6.28 (closes: #510037)
+  * Bump Standards-Version to 3.8.0 (no changes)
+  * Remove spurious build dependency on module-assistant 
+
+ -- Max Vozeler <xam@debian.org>  Sun, 22 Feb 2009 15:37:24 +0100
+
+loop-aes (3.2c-2) unstable; urgency=low
+
+  * loop-aes-testsuite: Add depends on make
+
+ -- Max Vozeler <xam@debian.org>  Fri, 14 Mar 2008 16:26:30 +0100
+
+loop-aes (3.2c-1) unstable; urgency=low
+
+  * New upstream release 
+
+ -- Max Vozeler <xam@debian.org>  Sun, 09 Mar 2008 01:42:39 +0100
+
+loop-aes (3.2b-5) unstable; urgency=low
+
+  * Restore debian/source/control (closes: #465385)
+
+ -- Max Vozeler <xam@debian.org>  Tue, 12 Feb 2008 09:16:17 +0100
+
+loop-aes (3.2b-4) unstable; urgency=low
+
+  * Back to being a pure -source package. Modules
+    are now included in linux-modules-extra-2.6.
+
+ -- Max Vozeler <xam@debian.org>  Fri, 08 Feb 2008 09:09:09 +0100
+
+loop-aes (3.2b-3) unstable; urgency=low
+
+  * Include Makefile-2.6 in -source so it can be
+    used by linux-modules-extra-2.6.
+
+ -- Max Vozeler <xam@debian.org>  Sun, 20 Jan 2008 12:14:42 +0100
+
+loop-aes (3.2b-2) unstable; urgency=low
+
+  * Update modules to 2.6.23-1
+  * Adapt gencontrol to linux-support-2.6.23-1
+  * Bump Standards-Version to 3.7.3 (no changes)
+
+ -- Max Vozeler <xam@debian.org>  Sat, 08 Dec 2007 21:11:33 +0100
+
+loop-aes (3.2b-1) unstable; urgency=low
+
+  * New upstream release
+  * Update modules to 2.6.22-3
+
+ -- Max Vozeler <xam@debian.org>  Sat, 27 Oct 2007 13:48:30 +0200
+
+loop-aes (3.2a-5) unstable; urgency=low
+
+  * Update modules to 2.6.22-2 
+  * Use explicit f argument to tar when creating 
+    loop-aes.tar.bz2
+
+ -- Max Vozeler <xam@debian.org>  Wed, 05 Sep 2007 23:55:22 +0200
+
+loop-aes (3.2a-4) unstable; urgency=low
+
+  * Update to 2.6.22-1
+  * Adapt gencontrol to linux-support-2.6.22-1
+  * Make loop-aes-modules-2.6-$(flavour) depend on
+    linux-latest-modules-$(KVERS)
+
+ -- Max Vozeler <xam@debian.org>  Sun, 12 Aug 2007 13:53:54 +0200
+
+loop-aes (3.2a-3) unstable; urgency=low
+
+  * Update modules to 2.6.21-2 
+
+ -- Max Vozeler <xam@debian.org>  Wed, 27 Jun 2007 00:28:12 +0200
+
+loop-aes (3.2a-2) unstable; urgency=low
+
+  * Update modules to 2.6.21-1
+  * Update years in debian/copyright and adapt to ciphers
+    merged in v3.2a.
+
+ -- Max Vozeler <xam@debian.org>  Wed, 23 May 2007 20:59:01 +0200
+
+loop-aes (3.2a-1) unstable; urgency=low
+
+  * New upstream release
+  * Finally use unchanged upstream tarball :-)
+  * Remove obsolete script debian/get-orig-source
+  * Remove README.ciphers, changelog.ciphers
+  * Use upstream Makefile in debian/rules.real
+  * Adapt debian/rules.real, debian/source/rules for changed paths
+  * Update documentation on ciphers
+  * Update README.Debian on now obsolete GnuPG patch, 
+    thanks to Torbjörn Wictorin. (Closes: #423395)
+
+ -- Max Vozeler <xam@debian.org>  Thu, 17 May 2007 20:11:54 +0200
+
+loop-aes (3.1f-2) unstable; urgency=low
+
+  * Update modules to 2.6.20-1
+  * Enable support for VIA padlock xcrypt instruction
+  * Adapt gencontrol to linux-support-2.6.20-1
+
+ -- Max Vozeler <xam@debian.org>  Sat, 21 Apr 2007 20:22:06 +0200
+
+loop-aes (3.1f-1) experimental; urgency=low
+
+  * New upstream release (Closes: #403974)
+  * Make module packages depend on linux-modules-$KVERS 
+    instead of linux-image-$KVERS. (Closes: #409205)
+
+ -- Max Vozeler <xam@debian.org>  Sat, 24 Feb 2007 22:17:56 +0100
+
+loop-aes (3.1d-13) unstable; urgency=low
+
+  * Adapt bin/gencontrol.py to cope with .dsfg version
+  * Update modules to 2.6.18-4 
+
+ -- Max Vozeler <xam@debian.org>  Sun, 28 Jan 2007 12:32:15 +0100
+
+loop-aes (3.1d-12) unstable; urgency=low
+
+  * Update modules to 2.6.18-3 
+  * Provide usage information for loop-aes-runtests
+  * Reenable keyscrub by default
+
+ -- Max Vozeler <xam@debian.org>  Fri, 24 Nov 2006 20:11:06 +0100
+
+loop-aes (3.1d-11) unstable; urgency=low
+
+  * Update modules to 2.6.18-2
+  * Add manpage for loop-aes-runtests
+  * Make loop-aes-runtest quiet by default, add -v
+  * Set maintainer to Debian Loop-AES Team
+
+ -- Max Vozeler <xam@debian.org>  Thu,  9 Nov 2006 19:13:31 +0100
+
+loop-aes (3.1d-10) unstable; urgency=low
+
+  * Update the package name for dpkg-divert. (Closes: #392841)
+  * Drop conflicts with loop-aes-ciphers-$KVERS
+
+ -- Max Vozeler <xam@debian.org>  Sun, 15 Oct 2006 17:35:09 +0200
+
+loop-aes (3.1d-9) unstable; urgency=low
+
+  * Update to 2.6.18-1
+  * Respect modules: False in arch defines. (Closes: #390554)
+  * Use a hardlink for loop-aes.ko -> loop.ko
+
+ -- Max Vozeler <xam@debian.org>  Sat,  7 Oct 2006 17:55:18 +0200
+
+loop-aes (3.1d-8) unstable; urgency=low
+
+  * Revert back to 2.6.17-2 for upload to unstable
+
+ -- Max Vozeler <xam@debian.org>  Sun,  1 Oct 2006 18:59:30 +0200
+
+loop-aes (3.1d-7) experimental; urgency=low
+
+  * Update to 2.6.18-1
+  * Build-depend on fakeroot
+
+ -- Max Vozeler <xam@debian.org>  Thu, 28 Sep 2006 18:14:02 +0200
+
+loop-aes (3.1d-6) experimental; urgency=low
+
+  * Include symlink loop-aes.ko -> loop.ko
+  * Change short description to include @class@
+  * Only include NEWS in loop-aes-source
+
+ -- Max Vozeler <xam@debian.org>  Sun, 24 Sep 2006 19:53:00 +0200
+
+loop-aes (3.1d-5) experimental; urgency=low
+
+  * Use linux-support infrastructure
+  * Merge loop-aes-source and loop-aes-modules
+  * No longer build udebs
+
+ -- Max Vozeler <xam@debian.org>  Wed, 22 Sep 2006 12:20:54 +0200
+
+loop-aes-source (3.1d-4) unstable; urgency=low
+
+  * Rename module packages to loop-aes-modules-$KVERS and add 
+    corresponding Conflicts/Replaces.
+  * Split loop-AES runtime test suite into a separate package.
+  * Drop support for DEB_BUILD_OPTIONS=udeb
+  * Update to standards version 3.7.2 (no changes)
+
+ -- Max Vozeler <xam@debian.org>  Mon,  7 Aug 2006 15:24:49 +0200
+
+loop-aes-source (3.1d-3) unstable; urgency=low
+
+  * No longer pass CC to the loop-AES/ciphers Makefiles. 
+    Doing so breaks builds for parisc64 kernels (hppa).
+
+ -- Max Vozeler <xam@debian.org>  Sat, 29 Apr 2006 20:39:42 +0200
+
+loop-aes-source (3.1d-2) unstable; urgency=low
+
+  * Add information about loading the module on boot to
+    README.Debian. (Closes: #363522)
+  * Make sure debian/rules in loop-aes.tar.bz2 is executable
+  * debian/rules: Add noop build target
+  * debian/control: Build-depend on debhelper
+
+ -- Max Vozeler <xam@debian.org>  Fri, 28 Apr 2006 10:11:57 +0200
+
+loop-aes-source (3.1d-1) unstable; urgency=low
+
+  * New upstream release (3.1d, ciphers 3.0d)
+  * patches/10_kbuild_str_2.6.16:
+    - Included upstream
+
+ -- Max Vozeler <xam@debian.org>  Mon, 10 Apr 2006 17:04:31 +0200
+
+loop-aes-source (3.1c-5) unstable; urgency=low
+
+  * Include README.modules in /usr/share/doc/loop-aes-source
+    and add information about the new checkfs-loop init script.
+
+ -- Max Vozeler <xam@debian.org>  Mon, 10 Apr 2006 03:30:01 +0200
+
+loop-aes-source (3.1c-4) unstable; urgency=low
+
+  * patches/10_kbuild_str_2.6.16:
+    Add patch to fix builds for kernel 2.6.16 (Closes: #358568)
+
+ -- Max Vozeler <xam@debian.org>  Thu, 23 Mar 2006 15:57:05 +0100
+
+loop-aes-source (3.1c-3) unstable; urgency=low
+
+  * Include a dummy debian/patches/00list. (Closes: #354204)
+
+ -- Max Vozeler <xam@debian.org>  Sat, 25 Feb 2006 18:20:13 +0100
+
+loop-aes-source (3.1c-2) unstable; urgency=low
+
+  * Install upstream changelogs
+  * Rename directories in modules/ to not include version numbers.
+  * reqsrc() is no longer needed, install m-a override (default.sh)
+  * Install 2.6 modules into /lib/modules/$(KERNEL)/updates and
+    remove obsolete diversions on upgrade.
+
+ -- Max Vozeler <xam@debian.org>  Sun, 22 Jan 2006 14:23:20 +0100
+
+loop-aes-source (3.1c-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Max Vozeler <xam@debian.org>  Mon, 12 Dec 2005 16:27:15 +0100
+
+loop-aes-source (3.1b-8) unstable; urgency=low
+
+  * Drop recommends on kernel-source 
+  * Some work on the package descriptions
+
+ -- Max Vozeler <xam@debian.org>  Mon, 12 Dec 2005 15:35:37 +0100
+
+loop-aes-source (3.1b-7) unstable; urgency=low
+
+  * Updated documentation to reflect that linux-headers are
+    now sufficient to build loop-AES.
+  * Autoload loop.ko in the testsuite
+
+ -- Max Vozeler <xam@debian.org>  Sat, 10 Dec 2005 02:58:39 +0100
+
+loop-aes-source (3.1b-6) unstable; urgency=low
+
+  * This version can build with -headers
+  * Generate module dependencies also for non-running kernels
+    (inspired by alsa-driver)
+  * Remove code for upgrading from pre-sarge versions
+
+ -- Max Vozeler <xam@debian.org>  Tue,  1 Nov 2005 16:50:47 +0100
+
+loop-aes-source (3.1b-5) unstable; urgency=low
+
+  * debian/patches/v3.1b-20051020.dpatch:
+    + Added. Includes XEN fix.
+  * debian/patches/xen_oops_wbinvd.dpatch:
+    + Removed.
+
+ -- Max Vozeler <xam@debian.org>  Thu, 20 Oct 2005 18:17:08 +0200
+
+loop-aes-source (3.1b-4) unstable; urgency=low
+
+  * Install udeb modules into the correct /lib/modules directory
+
+ -- Max Vozeler <xam@debian.org>  Wed, 19 Oct 2005 15:55:33 +0200
+
+loop-aes-source (3.1b-3) unstable; urgency=low
+
+  * debian/patches/xen_oops_wbinvd.dpatch:
+    + Prevent use of the wbinvd instruction when building
+      for XEN kernels. (Closes: #331507)
+
+ -- Max Vozeler <xam@debian.org>  Sun,  9 Oct 2005 21:47:06 +0200
+
+loop-aes-source (3.1b-2) unstable; urgency=low
+
+  * Depend on dpatch (>= 2.0.0) for the new patch system 
+    introduced in 3.1b-1
+
+ -- Max Vozeler <xam@debian.org>  Mon,  3 Oct 2005 13:58:43 +0200
+
+loop-aes-source (3.1b-1) unstable; urgency=low
+
+  * New upstream release (loop-AES v3.1b)
+  * Merge with package -ciphers-source
+  * Build loop-AES and ciphers with shared modverdir
+  * Add get-orig-source target
+
+ -- Max Vozeler <xam@debian.org>  Fri, 26 Aug 2005 23:47:24 +0200
+
+loop-aes-source (3.0d-4) unstable; urgency=low
+
+  * Build with KEYSCRUB=y by default
+  * Include testsuite in binary packages
+  * Include separate README.Debian for binary packages
+  * Small wording changes in descriptions
+  * Refactored debian/rules
+
+ -- Max Vozeler <xam@debian.org>  Thu,  4 Aug 2005 16:23:29 +0200
+
+loop-aes-source (3.0d-3) unstable; urgency=low
+
+  * Fix example in README.Debian for make-kpkg CC override
+  * Add provision for building a loop-aes-$KVERS-udeb 
+
+ -- Max Vozeler <xam@debian.org>  Sun, 31 Jul 2005 18:08:32 +0200
+
+loop-aes-source (3.0d-2) unstable; urgency=low
+
+  * Pass CC to Makefile to allow overriding the compiler
+  * Improved documentation
+  * Bump standards version to 3.6.2 (no changes)
+  * Recommend kernel-source (addresses parts of #316810)
+  * Module packages:
+    - Recommend kernel-image-KVERS | linux-image-KVERS
+    - Run depmod only if installing for the running kernel
+
+ -- Max Vozeler <xam@debian.org>  Sat, 30 Jul 2005 16:43:07 +0200
+
+loop-aes-source (3.0d-1) unstable; urgency=low
+
+  * New upstream release
+  * Update build instructions for module-assistant and official
+    Debian kernels. (Closes: #312455)
+  * Copy debian/compat into the .tar.bz2
+
+ -- Max Vozeler <xam@debian.org>  Mon, 20 Jun 2005 21:04:20 +0200
+
+loop-aes-source (3.0c-2) unstable; urgency=low
+
+  * Upload to unstable
+  * Removed Eduard from Uploaders. Thanks for your sponsoring!
+
+ -- Max Vozeler <xam@debian.org>  Wed,  8 Jun 2005 12:45:50 +0200
+
+loop-aes-source (3.0c-1) experimental; urgency=low
+
+  * New upstream release
+  * Use $(ROOT_CMD) in kdist_clean
+  * Update year of Jari's copyright
+
+ -- Max Vozeler <xam@debian.org>  Thu, 24 Mar 2005 14:40:05 +0100
+
+loop-aes-source (3.0b-2) experimental; urgency=low
+
+  * Fix permissions in loop-aes.tar.bz2
+
+ -- Max Vozeler <xam@debian.org>  Tue,  8 Mar 2005 18:05:22 +0100
+
+loop-aes-source (3.0b-1) experimental; urgency=low
+
+  * Targeted at experimental
+  * New upstream release (v3.0b-20050212)
+
+ -- Max Vozeler <xam@debian.org>  Wed,  2 Mar 2005 12:24:59 +0100
+
+loop-aes-source (3.0a-1) experimental; urgency=low
+
+  * New upstream release (v3.0a-20041130)
+  * Module packages depend on loop-aes-utils >= 2.12p-1
+  * Add debian/watch file
+
+ -- Max Vozeler <xam@debian.org>  Wed, 23 Feb 2005 19:27:32 +0100
+
+loop-aes-source (2.2d-5) unstable; urgency=low
+
+  * Use $(ROOT_CMD) in kdist_clean
+
+ -- Max Vozeler <xam@debian.org>  Thu, 24 Mar 2005 16:22:00 +0100
+
+loop-aes-source (2.2d-4) unstable; urgency=low
+
+  * Fix permissions in loop-aes.tar.bz2
+
+ -- Max Vozeler <xam@debian.org>  Tue,  8 Mar 2005 16:41:55 +0100
+
+loop-aes-source (2.2d-3) unstable; urgency=low
+
+  * debian/copyright:
+    - Include copyrights on *.{diff,original,patched}
+  * debian/preinst.modules.in
+  * debian/postinst.modules.in
+  * debian/postrm.modules.in
+    - Move the diverted loop module so that the original 
+      module is not found by depmod. (Closes: #289891)
+  * Drop recommends on loop-aes-utils
+  * Update README.Debian
+  * Change maintainer's address
+  * Check for a complete source tree upon compilation
+
+ -- Max Vozeler <xam@debian.org>  Mon, 14 Feb 2005 12:04:20 +0100
+
+loop-aes-source (2.2d-2) unstable; urgency=low
+
+  * Module packages provide a virtual package 'loop-aes-modules'.
+    (Closes: #282989)
+    
+  * Create parent directories before the diversion is added to
+    fix installation when the corresponding kernel-image is not
+    installed. (Closes: #284233) 
+ 
+  * Remove the directory for disabled modules in postrm after 
+    the diversion has been removed. 
+
+  * Update of the long package descriptions.
+
+ -- Max Vozeler <max@hinterhof.net>  Tue, 21 Dec 2004 16:47:15 +0100
+
+loop-aes-source (2.2d-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Max Vozeler <max@hinterhof.net>  Sun, 31 Oct 2004 16:53:08 +0100
+
+loop-aes-source (2.2c-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Max Vozeler <max@hinterhof.net>  Sun, 31 Oct 2004 16:45:28 +0100
+
+loop-aes-source (2.2b-2) unstable; urgency=high
+
+  * Urgency high: The 2.2b release fixes read-ahead problems with 2.6.8
+    and ext3/reiserfs that could cause IO errors. (Closes: #273078)
+
+  * Update build steps in README.Debian
+
+ -- Max Vozeler <max@hinterhof.net>  Thu,  9 Sep 2004 13:28:57 +0200
+
+loop-aes-source (2.2b-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Max Vozeler <max@hinterhof.net>  Thu,  9 Sep 2004 13:27:12 +0200
+
+loop-aes-source (2.2a-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Max Vozeler <max@hinterhof.net>  Wed,  8 Sep 2004 21:41:36 +0200
+
+loop-aes-source (2.1c-2) unstable; urgency=low
+
+  * Applied updates/loop-AES-2.1c-20040813.diff
+  * Applied upstream's clarification of the license (aes-GPL.diff)
+
+ -- Max Vozeler <max@hinterhof.net>  Tue, 17 Aug 2004 11:39:10 +0200
+
+loop-aes-source (2.1c-1) unstable; urgency=low
+
+  * New upstream release
+  * Remove old-kbuild patch
+
+ -- Max Vozeler <max@hinterhof.net>  Wed, 28 Jul 2004 18:32:16 +0200
+
+loop-aes-source (2.1b-1) unstable; urgency=low
+
+  * New upstream release. (Closes: #253368)
+    - Fixes build problems with 2.6.6 (Closes: #250767)
+  * Updated old-kbuild patch to use private MODVERDIR.
+
+ -- Max Vozeler <max@hinterhof.net>  Fri, 28 May 2004 20:03:07 +0200
+
+loop-aes-source (2.1a-1) unstable; urgency=low
+
+  * New upstream release
+  * Applied updates/loop-AES-2.1a-20040513.diff
+  * Applied updates/loop-AES-2.1a-20040520.diff
+  * Patched Makefile to use kbuild in old SUBDIRS way for kernels < 2.6.6
+  * Builds with USE_KBUILD=y for 2.6 kernels.
+  * Reverted my modpost-without-vmlinux hack.
+
+ -- Max Vozeler <max@hinterhof.net>  Sat, 22 May 2004 00:16:03 +0200
+
+loop-aes-source (2.0g-3) unstable; urgency=low
+
+  * Updated README
+
+ -- Max Vozeler <max@hinterhof.net>  Wed, 14 Apr 2004 01:40:14 +0200
+
+loop-aes-source (2.0g-2) unstable; urgency=low
+
+  * Applied updates/loop-AES-2.0g-20040330.diff
+
+ -- Max Vozeler <max@hinterhof.net>  Fri,  9 Apr 2004 02:56:35 +0200
+
+loop-aes-source (2.0g-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Max Vozeler <max@hinterhof.net>  Tue, 16 Mar 2004 02:12:05 +0100
+
+loop-aes-source (2.0f-2) unstable; urgency=low
+
+  * Makefile:
+    - Call modpost without vmlinux; this looses versioned symbols but makes
+      it possible to build with just a clean and configured source tree.
+  * debian/copyright:
+    - Update years in copyright statement
+  * debian/rules:
+    - Remove obsolete README.cryptoroot symlink
+
+ -- Max Vozeler <max@hinterhof.net>  Sat, 13 Mar 2004 14:05:06 +0100
+
+loop-aes-source (2.0f-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Max Vozeler <max@hinterhof.net>  Wed, 11 Feb 2004 01:39:41 +0100
+
+loop-aes-source (2.0e-5) unstable; urgency=low
+
+  * Rebuilt with working tar (1.13.92-1 bug)
+
+ -- Eduard Bloch <blade@debian.org>  Sun,  1 Feb 2004 14:27:45 +0100
+
+loop-aes-source (2.0e-4) unstable; urgency=low
+
+  * The fix in the last version was incomplete; The original loop.o
+    module must be moved outside the kernel/ directory.
+
+ -- Max Vozeler <max@hinterhof.net>  Sun,  1 Feb 2004 01:02:13 +0100
+
+loop-aes-source (2.0e-3) unstable; urgency=low
+
+  * Fix for the changed modprobe traversal order in modutils 2.4.26-1
+  * Install loop.o in /lib/modules/$KVERS/kernel/drivers/block/
+  * Added preinst.modules.in and postrm.modules.in to dpkg-divert the
+    original loop.o
+
+ -- Max Vozeler <max@hinterhof.net>  Sat, 31 Jan 2004 18:25:44 +0100
+
+loop-aes-source (2.0e-2) unstable; urgency=low
+
+  * debian/README.Debian:
+    * Added a note about problems with multi-key and the old crypto patch
+
+ -- Max Vozeler <max@hinterhof.net>  Thu, 22 Jan 2004 14:45:56 +0100
+
+loop-aes-source (2.0e-1) unstable; urgency=low
+
+  * New upstream release
+  * Updated to standards version 3.6.1
+
+ -- Max Vozeler <max@hinterhof.net>  Wed, 21 Jan 2004 20:15:20 +0100
+
+loop-aes-source (2.0d-5) unstable; urgency=low
+
+  * Moved README.cryptoroot and mkinitrd+loop.patch to loop-aes-utils.
+    They document whats in that package so they really belong there.
+
+ -- Max Vozeler <max@hinterhof.net>  Sun, 11 Jan 2004 03:39:32 +0100
+
+loop-aes-source (2.0d-4) unstable; urgency=low
+
+  * debian/README.cryptoroot
+    * Updated to account for the changes in loop-aes-utils (new
+      keyfile location).
+    * Added info on encrypted swap
+
+ -- Max Vozeler <max@hinterhof.net>  Wed,  7 Jan 2004 23:44:47 +0100
+
+loop-aes-source (2.0d-3) unstable; urgency=low
+
+  * Added debian/README.cryptoroot documenting Debian specifics
+  * Added debian/mkinitrd+loop.patch as workaround to #225931
+  * Remove obsolete optimization notes, the Makefile auto-detects
+    architectures with assembler implementations now.
+  
+ -- Max Vozeler <max@hinterhof.net>  Fri,  2 Jan 2004 07:50:25 +0100
+
+loop-aes-source (2.0d-2) unstable; urgency=low
+
+  * Support for 2.6 kernels
+  * Added Build-Depends-Indep on bzip2
+  * Moved debhelper dependency to -Indep
+
+ -- Max Vozeler <max@hinterhof.net>  Tue, 23 Dec 2003 14:59:37 +0100
+
+loop-aes-source (2.0d-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Max Vozeler <max@hinterhof.net>  Sat, 20 Dec 2003 06:17:30 +0100
+
+loop-aes-source (2.0c-1) unstable; urgency=low
+
+  * New upstream release.
+  * Depends on bzip2 as the sources are compressed with it.
+
+ -- Max Vozeler <max@hinterhof.net>  Fri, 19 Dec 2003 00:10:18 +0100
+
+loop-aes-source (2.0b-1) unstable; urgency=low
+
+  * New upstream release.
+  
+ -- Max Vozeler <max@hinterhof.net>  Sat, 29 Nov 2003 15:57:53 +0100
+
+loop-aes-source (1.7e-14) unstable; urgency=low
+
+  * Updated README.Debian on the changed build methods
+
+ -- Max Vozeler <max@hinterhof.net>  Fri, 28 Nov 2003 04:42:39 +0100
+
+loop-aes-source (1.7e-13) unstable; urgency=low
+
+  * debian/rules refactored using module-assistant
+  * No more depmod runs during the build
+  * Run depmod in postinst of the binary module packages
+  * Added Depends: module-assistant, debhelper (>> 4.0.0)
+  * Added Suggests: kernel-package
+  * Removed Depends: make
+  * Run dh_clean at the end of the binary-modules target
+
+ -- Max Vozeler <max@hinterhof.net>  Wed, 26 Nov 2003 19:46:14 +0100
+
+loop-aes-source (1.7e-12) unstable; urgency=low
+
+  * Documented that kernel-headers are not sufficient to build
+  * Fixed binary-modules target for EXTRAVERSION kernels
+  * Binary pkg loop-aes-source: relaxed Depends: loop-aes-utils to Recommends.
+
+ -- Max Vozeler <max@hinterhof.net>  Tue, 25 Nov 2003 14:43:05 +0100
+
+loop-aes-source (1.7e-11) unstable; urgency=low
+
+  * Added Depends: loop-aes-utils
+  * Updated README.Debian on util-linux
+
+ -- Max Vozeler <max@hinterhof.net>  Fri, 21 Nov 2003 18:37:27 +0100
+
+loop-aes-source (1.7e-10) unstable; urgency=low
+
+  * Added missing steps to binary-modules target. The changelogs
+    are now compressed and the docs installed.
+  * Also in the binary-modules target, corrected the module install
+    path.
+
+ -- Max Vozeler <max@hinterhof.net>  Fri, 21 Nov 2003 02:13:59 +0100
+
+loop-aes-source (1.7e-9) unstable; urgency=low
+
+  * Initial upload (Closes: #111167)
+  * Updated README.Debian on Debian kernel situation
+  * Much improved long descriptions
+  * Added Depends: kernel-image-$kvers to control.modules.in
+
+ -- Max Vozeler <max@hinterhof.net>  Wed, 19 Nov 2003 19:21:11 +0100
+
+loop-aes-source (1.7e-8) unstable; urgency=low
+
+  * Fixed and added information in README.Debian
+  * More work on the descriptions
+  * No longer Provides: loop-aes-module
+  * Added Recommends: loop-aes-ciphers-source, kernel-package
+  * Added Depends: build-essential, make
+
+ -- Max Vozeler <max@hinterhof.net>  Wed, 29 Oct 2003 21:39:14 +0100
+
+loop-aes-source (1.7e-7) unstable; urgency=low
+
+  * Applied patches/loop-AES-v1.7e-20030922.diff.bz2
+  * Updated README.Debian on 2.6.0test
+  * More work on short and long Description
+
+ -- Max Vozeler <max@hinterhof.net>  Tue, 14 Oct 2003 15:31:07 +0200
+
+loop-aes-source (1.7e-6) unstable; urgency=low
+
+  * First public release
+  * Include debian/copyright in package built from loop-aes-source
+
+ -- Max Vozeler <max@hinterhof.net>  Mon, 13 Oct 2003 01:14:06 +0200
+
+loop-aes-source (1.7e-5) unstable; urgency=low
+
+  * Section: admin now
+  * Fixed name of source-package in control.modules.in
+  * Fixed install dir, packages produced from loop-aes-source
+    now contain the modules again.
+
+ -- Max Vozeler <max@hinterhof.net>  Sun, 12 Oct 2003 12:12:06 +0200
+
+loop-aes-source (1.7e-4) unstable; urgency=low
+
+  * Renamed source package to loop-aes-source
+  * Updated description
+  * Removed binary-arch target from default build
+
+ -- Max Vozeler <max@hinterhof.net>  Sun, 12 Oct 2003 04:11:45 +0200
+
+loop-aes (1.7e-3) unstable; urgency=low
+
+  * Updated README.Debian
+  * Removed driver/
+
+ -- Max Vozeler <max@hinterhof.net>  Sun, 12 Oct 2003 01:30:43 +0200
+
+loop-aes (1.7e-2) unstable; urgency=low
+
+  * Improved documentation
+  * Improved debian/copyright
+  * Manual and packaged builds from /usr/src/modules/loop-aes are working
+  * Fixed Depends
+  * loop-aes-modules-<KVERS> is now loop-aes-<KVERS>
+
+ -- Max Vozeler <max@hinterhof.net>  Sun, 12 Oct 2003 00:40:19 +0200
+
+loop-aes (1.7e-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Max Vozeler <max@hinterhof.net>  Fri, 10 Oct 2003 01:56:19 +0200

@@ -1,0 +1,145 @@
+#!/bin/sh
+
+# switchconf -- Easy configuration switch
+#
+# (c) 2002 Sebastien J. Gross <sjg@debian.org>
+# (c) 2005 Jose Calhariz <jose.calhariz@tagus.ist.utl.pt>
+# Please see the COPYRIGHT file included in the package.
+# $Id: switchconf,v 1.9 2002/04/22 19:04:45 jul Exp $
+#
+
+logfile="/var/log/switchconf"
+memfile="/var/lib/misc/switchconf.lastcfg"
+lockfile="/var/lock/switchconf"
+
+if [ -f /etc/switchconf/conf ]; then
+    .  /etc/switchconf/conf
+elif [ -f ./conf ]; then
+    .  ./conf
+else
+    echo "Configuration file not found"
+    exit
+fi
+
+
+help() {
+    echo "Syntax: switchconf [ configuration | -list | -help ]"
+    exit 0
+}
+
+list() {
+    cd ${conf_top_dirs}
+    find -maxdepth 1 -type d | sed 's/^\.\/\?//' | grep -v "\(^\$\|${exec_dir_before}\|${exec_dir_after}\)" | sort
+    exit 0
+}
+
+run_scripts(){
+    local scriptsdir=$1
+    shift
+    if test -x "${run_parts}" ; then
+	echo "Executing scripts: ";
+	${run_parts} -a "${conf}" "$scriptsdir" 2>&1 | tee -a ${logfile} 
+	echo "Executing scripts done.";
+    else
+	echo "Executing scripts: ";
+	for r in `find ${scriptsdir} -type f -perm +1 | sort`; do
+	    echo "$r" | tee -a ${logfile}
+	    ${r} "${conf}" 2>&1 | tee -a ${logfile}
+	done
+	echo "Executing scripts done.";
+    fi
+}
+
+run_scripts_before(){
+    run_scripts ${conf_top_dirs}/${exec_dir_before}
+}
+
+run_scripts_after(){
+    run_scripts ${conf_top_dirs}/${exec_dir_after}
+}
+
+# validates configuration file
+config_method=${config_method:=softlink}
+case ${config_method} in
+    softlink)
+    ;;
+    hardlink)
+    ;;
+    copy)
+    ;;
+    *)
+	echo "Check you configuration"
+	echo "config_method option have unsupported value'$config_method'"
+	exit
+esac
+
+[ $# -eq 1 ] || help
+conf=$1
+
+case ${conf} in
+    -list | -l )
+	list
+	;;
+    -help | -h )
+	help
+	;;
+esac
+
+cd ${conf_top_dirs}
+if [ ! -d ${conf} ]; then
+    echo "Configuration ${conf} not found"
+fi
+
+
+
+# Check last run of switchconf have stoped
+if ! dotlockfile -p -l -r 1 "${lockfile}" ; then
+    echo "There is another switchconf still runing" | tee -a ${logfile} 
+    echo "Aborting" | tee -a ${logfile} 
+    exit 1;
+fi
+
+# executing each scripts before
+run_scripts_before
+
+for f in `find ${conf} ! -type d | sed "s/^${conf}\///"`; do
+    dir=`dirname ${dest_dir}/${f}`
+    [ -d ${dir} ] || mkdir -p ${dir}
+    case ${config_method} in
+	copy)
+	    if test -e ${dest_dir}/${f} ; then
+		mv -f ${dest_dir}/${f} ${dest_dir}/${f}.SWITCHCONF && \
+		    cp -fa ${conf_top_dirs}/${conf}/${f} ${dest_dir}/${f} && \
+		    rm -f ${dest_dir}/${f}.SWITCHCONF
+	    else
+		    cp -fa ${conf_top_dirs}/${conf}/${f} ${dest_dir}/${f}
+	    fi		
+	    ;;
+	hardlink)
+	    if test -e ${dest_dir}/${f} ; then
+		mv -f ${dest_dir}/${f} ${dest_dir}/${f}.SWITCHCONF && \
+		    cp -fal ${conf_top_dirs}/${conf}/${f} ${dest_dir}/${f} && \
+		    rm -f ${dest_dir}/${f}.SWITCHCONF
+	    else
+		cp -fal ${conf_top_dirs}/${conf}/${f} ${dest_dir}/${f}
+	    fi		
+	    ;;
+	softlink|*)
+	    if test -e ${dest_dir}/${f} ; then
+		mv -f ${dest_dir}/${f} ${dest_dir}/${f}.SWITCHCONF && \
+		    ln -s ${conf_top_dirs}/${conf}/${f} ${dest_dir}/${f} && \
+		    rm -f ${dest_dir}/${f}.SWITCHCONF
+	    else
+		ln -s ${conf_top_dirs}/${conf}/${f} ${dest_dir}/${f}
+	    fi
+    esac
+done
+
+# executing each scripts after
+run_scripts_after
+
+echo "${conf}" > ${memfile}
+
+# remove lock
+dotlockfile -u "${lockfile}"
+exit 0

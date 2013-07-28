@@ -1,0 +1,9 @@
+#::sysinit:/etc/init.d/rcS
+tty1::askfirst:-/bin/sh
+::ctrlaltdel:/sbin/reboot
+::shutdown:/sbin/swapoff -a
+::shutdown:/bin/umount -a -r
+tty2::askfirst:/bin/sh
+tty3::askfirst:/bin/sh
+tty4::askfirst:/bin/sh
+#::respawn:/sbin/getty -L ttyS0 9600 vt100

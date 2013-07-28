@@ -1,0 +1,237 @@
+#!/bin/sh
+
+# $Id: keyprompt,v 1.16 2009-08-01 07:06:37 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+# this script starts the console and webserver prompts; it runs external
+# scripts to take care of these things
+
+# FIXME
+# - allow for changing the HTTP port via /proc/cmdline or a config file
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+DESC="Console key prompt"
+BASENAME="keyprompt"
+ACTION=$1
+# start the random key-picker and throbber unless
+# prompt is set to 'no'
+# BOOTCHEAT prompt=no - don't start the disk decryption toolchain
+# BOOTCHEAT prompt=KEY_ID - find key dir using key ID instead of the hostname
+file_parse "/proc/cmdline" "prompt"
+PROMPT=$PARSED
+
+if [ "x$PROMPT" = "xno" ]; then
+    exit 0
+fi # if [ "x$PROMPT" != "xno" ]
+
+# a default for the AES keylength
+# BOOTCHEAT aeskey= - AES encryption key length; [128|192|256] bits
+AESKEY="128"
+file_parse "/proc/cmdline" "aeskey"
+if [ ! -z $PARSED ]; then
+    AESKEY=$PARSED
+fi # if [ ! -z $PARSED ]; then
+
+mount_success () {
+    MOUNTED="$ROOT_DEV mounted with AES${KEY} encryption as /dev/loop0"
+    colorize_nl $S_SUCCESS "${BASENAME} - ${MOUNTED}"
+    colorize_nl $S_SUCCESS "${BASENAME} - ${MOUNTED}" > $SERIAL_PORT
+    exit 0
+} # mount_success
+
+loopback_test () {
+    colorize_nl $S_TIP "${BASENAME} - checking for existing loopback mount"
+    LOOPBACK_TEST=$(/sbin/losetup -a | wc -l | tr -d '\n')
+} # loopback_test
+
+show_netdev_ip () {
+# BOOTCHEAT netdev= - Network device to bring up in the initramfs image
+    file_parse "/proc/cmdline" "netdev"
+    NETDEV="netdev"
+    if [ ! -z $PARSED ]; then
+        NETDEV=$PARSED
+    fi
+    colorize_nl $S_TIP "${BASENAME} - current IP address of ${NETDEV} is:"
+    /bin/ip addr show
+    colorize_nl $S_TIP "${BASENAME} - end current IP address of ${NETDEV}"
+} # loopback_test
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    echo "cmdline - prompt; Whether to prompt the user to for a USB thumbdrive"
+    echo "cmdline - thumbdev; USB thumbdrive device/partition"
+    echo "cmdline - rootdev; Encrypted block device containing root volume"
+    exit 0
+  ;;
+  start)
+    # from here on down, we should be just waiting either for user input or
+    # for the CGI script to kill us instead
+
+    # BOOTCHEAT thumbdev= - device where the disk keys are stored
+    file_parse "/proc/cmdline" "thumbdev"
+    THUMB_DEV=$PARSED
+    #HOSTNAME=$(/bin/cat /etc/hostname | /usr/bin/tr -d '\n')
+    get_hostname # from lack_functions
+    # allow for alternate key directories
+    # FIXME change this to try for a directory with the same name as the
+    # volume group first, then use the hostname, then give up if neither are
+    # set
+    if [ "x${PROMPT}" != "x" ]; then
+        KEY_DIR=$PROMPT
+    else
+        KEY_DIR=$HOSTNAME
+    fi
+    KEY_MOUNT="/mnt/flash/keyhosts"
+    # write a pid file so we can be killed by the web script if necessary
+    write_child_pid $BASENAME $$
+    # loop until the encryption key directory becomes available
+    colorize $S_TIP "${BASENAME} - $DESC "
+    colorize $S_TIP "${BASENAME} - $DESC " > $SERIAL_PORT
+    want_shell
+
+    # FIXME test for multiple directories here
+    # /mnt/flash/keyhosts/$HOSTNAME, /mnt/flash/keys
+    loopback_test
+    show_netdev_ip
+    echo
+    colorize_nl $S_TIP \
+        "#### #   #  #### #### ####  ######   ##  # #### ##   # ## "
+    colorize_nl $S_TIP \
+        " ##  ##  # ##    ##   ##  #   ##     ## #  ##   ##   # ## "
+    colorize_nl $S_TIP \
+        " ##  ### # ###   ##   ##  #   ##     ## #  ##    ## #  ## "
+    colorize_nl $S_TIP \
+        " ##  #####  ###  #### ####    ##     ###   ####   ##    # "
+    colorize_nl $S_TIP \
+        " ##  # ###   ### ##   ## #    ##     ## #  ##     ##      "
+    colorize_nl $S_TIP \
+        " ##  #  ##    ## ##   ##  #   ##     ##  # ##     ##   ## "
+    colorize_nl $S_TIP \
+        "#### #   # ####  #### ##  #   ##     ##  # ####   ##   ## "
+    echo
+    colorize_nl $S_TIP \
+        "## Insert the USB thumbdrive with encrypted disk keys  ##"
+    echo
+    # start the spinner loop
+    KEY_TIMER=0
+    while [ ! -d $KEY_MOUNT/$KEY_DIR ];
+    do
+        # we already have a loopback device mounted from somewhere else
+        #if [ $LOOPBACK_TEST = 1 ]; then mount_success; fi
+        #/bin/mount -t vfat -o ro $THUMB_DEV /mnt/flash
+        /bin/mount -t vfat -o ro $THUMB_DEV /mnt/flash >/dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            # if the mount was successful, break out of this while loop
+            break
+        fi # if [ $? -eq 0 ]; then
+        KEY_TIMER=$(($KEY_TIMER + 1))
+        # print a twizzler thingie while we wait for key insertion
+        case $KEY_TIMER in
+            1) echo -ne "- \r"; echo -ne "- \r" > $SERIAL_PORT;;
+            2) echo -ne "\\ \r"; echo -ne "\\ \r" > $SERIAL_PORT;;
+            3) echo -ne "| \r"; echo -ne "| \r" > $SERIAL_PORT;;
+            4) echo -ne "/ \r"; echo -ne "/ \r" > $SERIAL_PORT; KEY_TIMER=0;;
+        esac
+        sleep 1
+    done
+
+    ### begin encrypted losetup
+
+    # get the key ID of the gnupg key we're going to use for mounting the
+    # loopback device
+    # TODO
+    # - add the option somehow to search the keyhosts folder by key ID instead
+    # of hostname
+    # - add the key randomizer here if the init script requests it, or if it
+    # requests a specific key ID, use that instead
+    # - test for secring/pubring below specifcally, throw a warning if they're
+    # not found; if you're using random keys, you'll copy the keys into
+    # secring/pubring yourself prior to doing the test
+    MASTER_KEY=$(/usr/bin/gpg --homedir $KEY_MOUNT/$KEY_DIR \
+        --list-secret-keys --lock-never --trust-model=always 2>/dev/null \
+        | grep "^sec" | sed 's/^sec .*1024D\/\(.*\) .*$/\1/' | tr -d '\n')
+     # get the path to the real root device which will be mounted to /dev/loop0
+    colorize $S_TIP "${BASENAME} - "
+    colorize_nl $S_TIP "Checking for root device in /proc/cmdline (rootdev)"
+    # BOOTCHEAT rootdev= - device with the encrypted root filesystem
+    file_parse "/proc/cmdline" "rootdev"
+    ROOT_DEV=$PARSED
+    if [ ! -b $ROOT_DEV ]; then
+        colorize_nl $S_FAILURE "hmm, block device ${ROOT_DEV} doesn't exist"
+        DEBUG=1
+        want_shell
+    fi # if [ ! -b $ROOT_DEV ]; then
+
+    # loop until the loopback device is successfully mounted
+    # TODO 
+    # - add a thingy here where a random key is selected in order to unlock the
+    # user disk key
+    # - add getopts to take the key ID as an option
+    # - move the losetup command below to lack_functions, then create a stub
+    # script that can be used directly from the initramfs image when you are
+    # running from the initramfs image
+    # - add a limit on the number of times the user can enter the correct
+    # passphrase?
+    while /bin/true;
+    do
+        ENTER_PP="Enter the passphrase for key 0x${MASTER_KEY}: "
+        WAITING_PP="Waiting on console for passphrase (key 0x${MASTER_KEY}); "
+        colorize $S_FAILURE "${BASENAME} - ${ENTER_PP}"
+        colorize $S_FAILURE "${BASENAME} - ${WAITING_PP} " > $SERIAL_PORT
+        stty -echo
+        read PASSPHRASE
+        stty echo
+        echo
+        # let the user know what we're up to
+        colorize $S_TIP "${BASENAME} - "
+        colorize_nl $S_TIP "Running losetup to attach loopback device..."
+        # echo the passphrase read in to STDIN of losetup
+        LOSETUP_CMD=$(echo "${PASSPHRASE}" \
+            | /sbin/losetup -G ${KEY_MOUNT}/${KEY_DIR} \
+            -K ${KEY_MOUNT}/${KEY_DIR}/disk_key.gpg -p 0 \
+            -e AES${AESKEY} /dev/loop0 ${ROOT_DEV} 2>&1)
+        # was 'losetup' successful?  break out of this while loop
+        # FIXME this will pass regardless of whether or not a loopback mount
+        # works
+        # :/  use '/sbin/losetup -a | wc -l' to verify that one loopback mount
+        # exists prior to continuing
+        if [ $? -eq 0 ]; then
+            break
+        fi
+        echo
+        colorize_nl $S_FAILURE "${BASENAME} - Loopback mount failed!"
+        colorize_nl $S_FAILURE "${BASENAME} - losetup command output:"
+        colorize_nl $S_FAILURE "${BASENAME} - ${LOSETUP_CMD}"
+        DEBUG=1
+        want_shell
+    done
+
+    echo
+    mount_success
+    ;;
+  stop)
+    # noop
+    :
+    ;;
+  restart|force-reload)
+    # noop
+    :
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

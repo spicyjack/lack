@@ -1,0 +1,4 @@
+# ideas/help from
+# http://www.debianadmin.com/rename-network-interface-using-udev-in-linux.html
+KERNEL=="eth*", SYSFS{address}=="00:12:34:fe:dc:ba", NAME="eth0"
+KERNEL=="eth*", SYSFS{address}=="00:56:78:98:76:54", NAME="eth1"

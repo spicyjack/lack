@@ -1,0 +1,53 @@
+#!/bin/sh
+
+# $Id: bb_install,v 1.2 2008-01-31 19:59:22 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+# /var/log/debug.env.state will get created if we're running in debug mode; in that
+# case, this script will have already been run
+if [ -e /var/log/debug.env.state ]; then exit 0; fi
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+# picks up things like 'colorize'
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BINARY=$BB
+[ -x "$BINARY" ] || exit 1
+BASENAME="bb-install"
+DESC="Installing Busybox Symlinks"
+BINARY_OPTS="--install -s"
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    exit 0
+  ;;
+  start)
+    colorize $S_TIP "$BASENAME: $DESC;"
+    $BINARY $BINARY_OPTS >> $DEBUG_LOG 2>&1
+    check_exit_status $? "${BASENAME}"
+    ;;
+  stop)
+    # noop
+    :
+    ;;
+  restart|force-reload)
+    # noop
+    :
+    ;;
+  *)
+    echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

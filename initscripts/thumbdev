@@ -1,0 +1,81 @@
+#!/bin/sh
+
+# $Id: thumbdev,v 1.16 2009-07-31 22:59:19 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BASENAME="thumbdev"
+DESC="Checking for Thumbdrive device in /proc/cmdline (thumbdev)"
+
+# we need this for both the start and stop actions; grab it here
+file_parse "/proc/cmdline" "thumbdev"
+THUMB_DEV=$PARSED
+
+#HOSTNAME=$(/bin/cat /etc/hostname | /usr/bin/tr -d '\n')
+get_hostname # from ant_functions
+KEY_MOUNT="/mnt/flash/keyhosts"
+
+file_parse "/proc/cmdline" "prompt"
+PROMPT=$PARSED
+
+# allow for alternate key directories
+if [ "x${PROMPT}" != "x" ]; then
+    KEY_DIR=$PROMPT
+else
+    KEY_DIR=$HOSTNAME
+fi
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    echo "cmdline - thumbdev; USB thumbdrive device/partition"
+    exit 0
+  ;;
+  start)
+    colorize_nl $S_TIP "$BASENAME: $DESC"
+
+    # set a default just in case
+    if [ -z $THUMB_DEV ]; then
+        THUMB_DEV=/dev/sdc1
+    fi
+    colorize_nl $S_TIP "$BASENAME: Checking ${THUMB_DEV} for 'keyhosts' folder"
+    ;;
+  stop)
+    # unmount the thumbdrive if it's mounted
+    if [ -d $KEY_MOUNT/$KEY_DIR ]; then
+        colorize $S_TIP "$BASENAME: Unmounting Thumbdrive device"
+        /bin/umount $THUMB_DEV
+        check_exit_status $? "$BASENAME: unmounting Thumbdrive device"
+        if [ $? -eq 0 ]; then
+            colorize_nl $S_SUCCESS \
+                "####################################################"
+            colorize_nl $S_SUCCESS \
+                "## Please remove the Thumbdrive from the USB port ##"
+            colorize_nl $S_SUCCESS \
+                "####################################################"
+            sleep 2
+        fi
+    fi 
+    ;;
+  restart|force-reload)
+    # noop
+    :
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

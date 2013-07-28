@@ -1,0 +1,53 @@
+#!/bin/sh
+
+# $Id: remount_rootfs,v 1.2 2008-01-31 19:59:22 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the Antlinux mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+# this file will get touched if we're running in debug mode; this script will
+# have already been run
+if [ -e /var/log/debug.env.state ]; then exit 0; fi
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BINARY=/bin/mount
+[ -x "$BINARY" ] || exit 1
+BASENAME="remount_rootfs"
+DESC="root filesystem (rootfs)"
+BINARY_OPTS="rootfs / -o remount"
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    exit 0
+  ;;
+  start)
+    colorize $S_TIP "$BASENAME: $DESC read/write;"
+    $BINARY $BINARY_OPTS,rw >> $DEBUG_LOG 2>&1
+    check_exit_status $? ${BASENAME}
+    ;;
+  stop)
+    colorize $S_TIP "$BASENAME: $DESC read-only;"
+    $BINARY $BINARY_OPTS,ro >> $DEBUG_LOG 2>&1
+    check_exit_status $? ${BASENAME}
+    ;;
+  restart|force-reload)
+    # noop
+    :
+    ;;
+  *)
+    echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

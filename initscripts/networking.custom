@@ -1,0 +1,92 @@
+#!/bin/sh
+
+# $Id: networking,v 1.19 2009-08-01 00:59:13 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+# BOOTCHEAT network= - Networking flag; 'no' = disable, 'lo' = loopback only
+file_parse "/proc/cmdline" "network"
+NETWORK=$PARSED
+if [ "x$NETWORK" == "xno" -o "x$NETWORK" == "xoff" -o "x$NETWORK" == "xnone" ];
+then exit 0; fi
+
+# BOOTCHEAT netdev= - Network device to bring up in the initramfs image
+file_parse "/proc/cmdline" "netdev"
+NETDEV="eth0"
+if [ ! -z $PARSED ]; then
+    NETDEV=$PARSED
+fi
+
+ACTION=$1
+BINARY=/sbin/ifup
+[ -x "$BINARY" ] || exit 0
+BASENAME="networking"
+DESC=$BASENAME
+BINARY_OPTS="-a -i /etc/network/interfaces"
+
+loopback_up () {
+    colorize $S_TIP "$BASENAME: Enabling ethernet interface 'lo'"
+    /bin/ip link set lo up
+    check_exit_status $? $BASENAME
+} # loopback_up ()
+
+dhcp_up () {
+    colorize $S_TIP "$BASENAME: Enabling ethernet interface '${NETDEV}'"
+    /bin/ip link set ${NETDEV} up
+    check_exit_status $? $BASENAME
+    colorize $S_TIP "$BASENAME: Starting DHCP client on '${NETDEV}'"
+    #$BINARY $BINARY_OPTS >> $DEBUG_LOG 2>&1
+    #/sbin/udhcpc -i eth0 -p /var/run/udhcpc.eth0.pid >> $DEBUG_LOG 2>&1 &
+    /sbin/dhclient -v -pf /var/run/udhcpc.${NETDEV}.pid ${NETDEV} \
+        >> $DEBUG_LOG 2>&1
+    check_exit_status $? $BASENAME
+} # dhcp_up ()
+
+dhcp_down () {
+    colorize $S_TIP "$BASENAME: Killing udhcpc process "
+    UDHCPC_PID=$(cat /var/run/udhcpc.${NETDEV}.pid)
+    echo -n "(PID = $UDHCPC_PID) "
+    kill -TERM $(cat /var/run/udhcpc.${NETDEV}.pid)
+    check_exit_status $? $BASENAME
+    colorize $S_TIP "$BASENAME: brining link down for interface ${NETDEV} "
+    /bin/ip link set ${NETDEV} down
+    check_exit_status $? $BASENAME
+} # dhcp_up ()
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    echo "cmdline - network; 'lo' to set up loopback only, or 'no' for no"
+    echo "                      networking whatsoever (script exits)"
+    exit 0
+  ;;
+  start)
+    case "$NETWORK" in
+        lo) loopback_up;;
+        * ) loopback_up; dhcp_up;;
+    esac
+    ;;
+  stop)
+        dhcp_down
+    ;;
+  restart|force-reload)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

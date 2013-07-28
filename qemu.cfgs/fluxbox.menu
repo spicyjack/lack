@@ -1,0 +1,4 @@
+[begin] (fluxbox)
+[include] (/home/demo/.fluxbox/menudefs.hook)
+[include] (/etc/X11/fluxbox/fluxbox-menu)
+[end]

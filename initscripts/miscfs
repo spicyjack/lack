@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# $Id: miscfs,v 1.4 2009-06-19 07:57:49 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BINARY=/bin/mount
+[ -x "$BINARY" ] || exit 1
+BASENAME="miscfs"
+DESC="/dev/pts, /proc/bus/usb and /dev/shm filesystems"
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    exit 0
+  ;;
+  start)
+    colorize $S_TIP "$BASENAME: Mounting /dev/pts (devpts);"
+    # apparently udev is creating these
+    #mkdir /dev/pts
+    $BINARY devpts /dev/pts -t devpts -o rw,noexec,nosuid,gid=5,mode=620 \
+        >> $DEBUG_LOG 2>&1
+    check_exit_status $? "$BINARY devpts /dev/pts -t devpts"
+
+    colorize $S_TIP "$BASENAME: Mounting /dev/shm (tmpfs);"
+    # apparently udev is creating these
+    #mkdir /dev/shm
+    $BINARY tmpfs /dev/shm -t tmpfs -o rw,nosuid,nodev >> $DEBUG_LOG 2>&1
+    check_exit_status $? "mount tmpfs /dev/shm -t tmpfs -o rw,nosuid,nodev"
+
+    # /proc/bus/usb has been removed in kernel 3.6.6;
+    # it's replacement is /dev/bus/usb; see
+    # $LINUX_SOURCE/Documentation/proc_usb_info.txt
+    # and http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=360165
+    # the usbfs block that was here has been removed, it's no longer needed
+    ;;
+  stop)
+    colorize $S_TIP "$BASENAME: Unmounting /dev/pts;"
+    /bin/umount /dev/pts
+    check_exit_status $? "Unmounting /dev/pts"
+    colorize $S_TIP "$BASENAME: Unmounting /dev/shm;"
+    /bin/umount /dev/shm
+    check_exit_status $? "Unmounting /dev/shm"
+    ;;
+  restart|force-reload)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

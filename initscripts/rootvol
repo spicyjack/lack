@@ -1,0 +1,78 @@
+#!/bin/sh
+
+# $Id: rootvol,v 1.19 2008-11-14 08:58:08 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+BASENAME="rootvol"
+ACTION=$1
+DESC="Mounting Root Volume"
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    echo "cmdline - volgrp; volume group part of the LVM path"
+    echo "cmdline - rootvol; root volume part of the LVM path"
+    echo "cmdline - rootdev; the full path to the root device"
+    echo "comment - use either volgrp/rootvol or root, not both"
+    exit 0
+  ;;
+  start)
+    # Get the root volume name from the kernel command line; there's multiple
+    # ways you can specify this now; either 'root=' or 'rootvol=' and
+    # 'volgrp='
+
+    # volume management is run from a different script; grab the name of the
+    # volume (if one exists)
+    file_parse "/proc/cmdline" "volgrp"
+    export VOL_GRP=$PARSED
+    # grab the root volume name
+    file_parse "/proc/cmdline" "rootvol"
+    export ROOT_VOL=$PARSED
+    ROOT_DEV="/dev/mapper/${VOL_GRP}-${ROOT_VOL}"
+    if [ ! -b $ROOT_DEV ]; then
+        # now try for a root device
+        file_parse "/proc/cmdline" "rootdev"
+        ROOT_DEV=$PARSED
+        # still didn't find a block device with the info the user passed in...
+        # bail out and tell the user
+        if [ ! -b $ROOT_DEV ]; then
+            colorize_nl $S_FAILURE "hmm, root volume or device doesn't exist"
+            colorize_nl $S_FAILURE "volgrp  = '${VOL_GRP}'"
+            colorize_nl $S_FAILURE "rootvol = '${ROOTVOL}'"
+            colorize_nl $S_FAILURE "rootdev = '${ROOT_DEV}'"
+            DEBUG=1
+            want_shell
+        fi # if [ ! -b $ROOT ];
+    fi # if [ ! -b $ROOT_DEV ]; then
+
+    # mount the root device or die trying
+    colorize $S_TIP "$BASENAME: Mounting root device '${ROOT_DEV}' read-only;"
+    mount -t auto -o ro $ROOT_DEV /mnt/rootvol >> $DEBUG_LOG 2>&1
+    check_exit_status $? $BASENAME
+    ;;
+  stop)
+    # noop
+    :
+    ;;
+  restart|force-reload)
+    # noop
+    :
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload|vars}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

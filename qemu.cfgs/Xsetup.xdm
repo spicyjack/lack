@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# $Id: Xsetup.xdm,v 1.1 2007-10-11 20:05:29 brian Exp $
+#
+# This script is run as root before showing login widget.
+
+#xsetroot -solid rgb:8/8/8
+xsetroot -solid RoyalBlue4

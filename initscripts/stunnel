@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# $Id: stunnel,v 1.11 2009-08-01 00:51:37 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BINARY="/usr/bin/stunnel"
+[ -x "$BINARY" ] || exit 0
+BASENAME=$(/usr/bin/basename $BINARY)
+DESC="stunnel SSL encryption"
+BINARY_OPTS="/etc/stunnel/stunnel.conf"
+
+file_parse "/proc/cmdline" "network"
+NETWORK=$PARSED
+if [ "x$NETWORK" == "xno" -o "x$NETWORK" == "xoff" -o "x$NETWORK" == "xnone" ];
+then exit 0; fi
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    echo "cmdline - networking; 'no' for no networking (script exits)"
+    exit 0
+  ;;
+  start)
+    colorize $S_TIP "$BASENAME: Starting $DESC"
+    $BINARY $BINARY_OPTS
+    check_exit_status $? $BASENAME
+    ;;
+  stop)
+    colorize $S_TIP "$BASENAME: Stopping $DESC"
+    STUNNEL_PID=$(cat /var/run/stunnel.pid)
+    /bin/kill -TERM $STUNNEL_PID
+    check_exit_status $? $BASENAME
+    ;;
+  restart|force-reload)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

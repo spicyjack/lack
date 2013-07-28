@@ -1,0 +1,94 @@
+#!/bin/sh
+
+# $Id: udev,v 1.10 2009-07-16 17:53:20 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the Antlinux mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+# this file will get touched if we're running in debug mode; this script will
+# have already been run
+if [ -e /var/log/debug.env.state ]; then exit 0; fi
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BINARY=/sbin/udevd
+[ -x "$BINARY" ] || exit 1
+BASENAME="udevd"
+DESC="udevd"
+BINARY_OPTS="--daemon"
+
+# script requirements:
+# - mounted /proc
+# - mounted /sys
+# - tmpfs support
+# - kernel version > 2.6.18
+# - hotplug support (/sys/kernel/event_helper)
+# - /dev/pts and /dev/shm need to be unmounted, but can be re-mounted once
+# udevd is run
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    exit 0
+  ;;
+  start)
+    colorize $S_TIP "$BASENAME: Mounting tmpfs for udev; "
+    echo > /sys/kernel/uevent_helper
+    /bin/mount -n -o size=10M,mode=0755 -t tmpfs tmpfs /dev
+    check_exit_status $? "${BASENAME}: mount tmpfs (/dev)"
+    # create a basic set of device nodes in the new /dev
+    # /dev/null is needed prior to starting udevd
+    colorize $S_TIP "$BASENAME: Creating static nodes in /dev"
+    # create directories that udev needs in order to run
+    /bin/mkdir -p /dev/.udev/queue/ /dev/.udev/rules.d/ /dev/.udev/db/
+    /lib/udev/create_static_nodes /dev
+    check_exit_status $? "${BASENAME}: udev create static nodes"
+    # start the actual daemon
+    colorize $S_TIP "$BASENAME: Starting udevd"
+    $BINARY $BINARY_OPTS >> $DEBUG_LOG 2>&1
+    UDEVD_STATUS=$?
+    #check_exit_status $? "${BASENAME}: starting udevd"
+    # get_pid sets $CHILD_PID
+    get_pid $BINARY
+    write_child_pid $BASENAME $CHILD_PID
+    # give the user some status
+    if [ $UDEVD_STATUS -eq 0 ]; then
+        colorize $S_SUCCESS "$SUCCESS"
+        echo " (PID=${CHILD_PID})"
+    else
+        colorize_nl $S_FAILURE "$FAILED"
+        colorize_nl $S_FAILURE "udevd exited with status code $UDEVD_STATUS"
+    fi # if [ $UDEV_STATUS -eq 0 ]
+    colorize $S_TIP "$BASENAME: Running 'udevadm trigger'"
+    /sbin/udevadm trigger >> $DEBUG_LOG 2>&1
+    check_exit_status $? "${BASENAME}: running udevadm trigger"
+    ;;
+  stop)
+    UDEV_PID=$(cat /var/run/${BASENAME}.pid)
+    colorize $S_TIP "${BASENAME}: Stopping $DESC "
+    echo -n "(PID=${UDEV_PID});"
+    /bin/kill -TERM $UDEV_PID
+    check_exit_status $? "${BASENAME}: killing PID of udevd"
+    colorize $S_TIP "$BASENAME: Unmounting tmpfs for udev; "
+    /bin/umount -l /dev
+    check_exit_status $? "${BASENAME}: unmounting tmpfs (/dev)"
+    ;;
+  restart|force-reload)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

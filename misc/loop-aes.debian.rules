@@ -1,0 +1,82 @@
+#!/usr/bin/make -f
+
+# loop-AES build options
+OPTIONS := KEYSCRUB=y PADLOCK=y EXTRA_CIPHERS=y INTELAES=y
+
+PACKAGE	:= loop-aes
+MA_DIR  ?= /usr/share/modass
+-include $(MA_DIR)/include/generic.make
+-include $(MA_DIR)/include/common-rules.make
+
+PKGDIR  := debian/loop-aes-modules-$(KVERS)
+DOCDIR  := $(PKGDIR)/usr/share/doc/loop-aes-modules-$(KVERS)
+
+KV := $(shell echo "$(KVERS)" | sed -e 's/^\([2-9]\.[2-9]\)\..*/\1/')
+ifeq (2.4,$(KV))
+MODDIR  := $(PKGDIR)/lib/modules/$(KVERS)/kernel/drivers/block
+else
+MODDIR  := $(PKGDIR)/lib/modules/$(KVERS)/updates
+OPTIONS += USE_KBUILD=y
+endif
+
+configure: prep-deb-files
+
+kdist_config: configure
+
+kdist_clean:
+	$(ROOT_CMD) make -f debian/rules clean
+
+build: build-stamp
+build-stamp: configure
+	$(MAKE) LINUX_SOURCE=$(KSRC) $(OPTIONS) RUNDM=n MODINST=n
+	touch build-stamp
+
+install: install-stamp
+install-stamp: build
+	# install modules
+	m=loop; \
+	for module in tmp-d-kbuild/$$m.ko $$m.ko $$m.o; do \
+	    if [ -f $$module ]; then \
+	        mod=`basename $$module`; \
+	        install -m644 -b -D $$module $(MODDIR)/$$mod; \
+		break; \
+	    fi \
+	done \
+
+	# loop_*
+	for m in loop_serpent loop_twofish loop_blowfish; do \
+	    for module in tmp-d-kbuild/$$m.ko $$m.ko $$m.o; do \
+		if [ -f $$module ]; then \
+		    mod=`basename $$module`; \
+		    install -m644 -b -D $$module $(MODDIR)/$$mod; \
+		    break; \
+		fi \
+	    done \
+	done
+
+	touch install-stamp
+
+binary-modules: configure build install
+	dh_testdir
+	dh_testroot
+	dh_installdirs
+	dh_installdocs README
+	dh_installchangelogs ChangeLog
+
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol -- -v$(VERSION)
+	dh_md5sums
+	dh_builddeb --destdir=$(DEB_DESTDIR)
+
+clean:
+	dh_testdir
+	dh_testroot
+	$(MAKE) clean
+	rm -f build-stamp install-stamp
+	dh_clean
+
+.PHONY: clean configure build binary-indep binary-arch binary binary-modules install kdist_config kdist_clean
+
+# $Id: rules.modules 1879 2006-08-07 14:02:32Z max $

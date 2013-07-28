@@ -1,0 +1,4 @@
+[submenu] (Frequently Used) {}
+    [exec] (mrxvt) {/usr/bin/mrxvt -geometry +0-0} </usr/share/pixmaps/mrxvt.png>
+    [exec] (xterm) {/usr/bin/xterm} </usr/share/pixmaps/xterm-color_32x32.xpm>
+[end]

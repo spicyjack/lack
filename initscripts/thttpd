@@ -1,0 +1,70 @@
+#!/bin/sh
+
+# $Id: thttpd,v 1.11 2009-08-01 00:51:37 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+# FIXME
+# - allow for changing the HTTP port via /proc/cmdline or a config file
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+file_parse "/proc/cmdline" "network"
+NETWORK=$PARSED
+if [ "x$NETWORK" == "xno" -o "x$NETWORK" == "xoff" -o "x$NETWORK" == "xnone" ];
+then exit 0; fi
+
+ACTION=$1
+BINARY="/usr/sbin/thttpd"
+[ -x "$BINARY" ] || exit 1
+DESC="Webserver"
+BASENAME=$(/usr/bin/basename $BINARY)
+HTTPD_DOCROOT="/var/www"
+HTTPD_PORT=27448 # (2-shit)
+#HTTPD_CGI_PATTERN="**.cgi" # ** == any string including slashes
+HTTPD_PID_FILE="/var/run/thttpd.pid"
+HTTPD_USER="root"
+#BINARY_OPTS="-d $HTTPD_DOCROOT -p $HTTPD_PORT -c '$HTTPD_CGI_PATTERN'"
+BINARY_OPTS="-d $HTTPD_DOCROOT -p $HTTPD_PORT "
+BINARY_OPTS="$BINARY_OPTS -i $HTTPD_PID_FILE -u $HTTPD_USER"
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    echo "cmdline - networking; 'no' for no networking (script exits)"
+    exit 0
+  ;;
+  start)
+    colorize $S_TIP "$BASENAME: Starting $DESC"
+    colorize $S_TIP "$BASENAME: Starting $DESC" > $SERIAL_PORT
+    $BINARY $BINARY_OPTS
+    check_exit_status $? $BASENAME
+    colorize_nl $S_SUCCESS "$SUCCESS" > $SERIAL_PORT
+    ;;
+  stop)
+    colorize $S_TIP "$BASENAME: Stopping $DESC"
+    colorize $S_TIP "$BASENAME: Stopping $DESC" > $SERIAL_PORT
+    HTTPD_PID=$(cat $HTTPD_PID_FILE)
+    /bin/kill $HTTPD_PID
+    check_exit_status $? $BASENAME
+    colorize_nl $S_SUCCESS "$SUCCESS" > $SERIAL_PORT
+    ;;
+  restart|force-reload)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: webserver {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

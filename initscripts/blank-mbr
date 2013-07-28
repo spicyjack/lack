@@ -1,0 +1,113 @@
+#!/bin/sh
+
+# $Id: blank-mbr,v 1.4 2009-07-14 22:03:21 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+# picks up things like colorize()
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+# parse out the device to wipe
+file_parse "/proc/cmdline" "blankdev"
+export BLANK_DEV=$PARSED
+# parse out whether or not to confirm blanking
+file_parse "/proc/cmdline" "confirm"
+export CONFIRM_BLANK=$PARSED
+# driver settle time, in seconds
+export SETTLE_TIME=3
+
+ACTION=$1
+BINARY=/bin/dd
+[ -x "$BINARY" ] || exit 1
+BASENAME="blank_mbr"
+
+case "$ACTION" in
+  vars)
+    # echo out what commandline variables are parsed by this script
+    echo "${BASENAME}:"
+    exit 0
+  ;;
+  start)
+    echo
+    colorize_nl $S_INFO "=== BLANK THE MASTER BOOT RECORD ==="
+    colorize_nl $S_TIP  "This Linux image is built to blank the first 20M"
+    colorize_nl $S_TIP  "on a hard disk drive that you specify."
+    echo
+    # do the settle time thing
+    colorize_nl $S_TIP "Waiting $SETTLE_TIME seconds for drivers to settle;"
+    sleep $SETTLE_TIME
+    # if there's no blank device, the user will have to enter one
+    if [ "x$BLANK_DEV" = "x" ]; then
+
+        while /bin/true;
+        do
+            echo "List of disks on this machine:"
+            cat /proc/partitions
+            colorize $S_FAILURE "Type in the name of the disk to blank --> "
+            read ANSWER
+            # strip the newline
+            BLANK_DEV=$(echo $ANSWER | tr -d '\n')
+            export BLANK_DEV
+            colorize_nl $S_TIP "Verifying block device '$BLANK_DEV'"
+            if [ "x$BLANK_DEV" != "x" ]; then
+                if [ -b $BLANK_DEV ]; then
+                    colorize_nl $S_SUCCESS "Block device $BLANK_DEV is valid!"
+                    break
+                else
+                    colorize_nl $S_FAILURE "ERROR: Unknown disk $BLANK_DEV"
+                    colorize_nl $S_TIP "Please try again"
+                fi # if [ -b $BLANK_DEV ]
+            fi # if [ "x$BLANK_DEV" != "x" ]
+        done # while /bin/true
+    fi # if [ "x$BLANK_DEV" = "x" ]
+    if [ "x$CONFIRM_BLANK" = "xn" \
+        -o "x$CONFIRM_BLANK" = "xno" \
+        -o "x$CONFIRM_BLANK" = "xN" \
+        -o "x$CONFIRM_BLANK" = "xNO" \
+        -o "x$CONFIRM_BLANK" = "xNo" ]; then
+        ANSWER='y'
+    else
+        colorize_nl $S_FAILURE "About to blank $BLANK_DEV; are you sure? [Y/n]"
+        colorize_nl $S_TIP "(Press 'Y' or 'y' to blank $BLANK_DEV; any other key exits)"
+        read ANSWER
+    fi # if [ "x$CONFIRM_BLANK" = "xn" -o
+    BINARY_OPTS="if=/dev/zero of=$BLANK_DEV bs=1024 count=20000"
+    if [ "x$ANSWER" = "xY" -o "x$ANSWER" = "xy" ]; then
+        colorize_nl $S_TIP "Blanking $BLANK_DEV"
+        colorize_nl $S_SUCCESS "$BINARY $BINARY_OPTS"
+        $BINARY $BINARY_OPTS >> /var/log/boot.log 2>&1
+        check_exit_status $? "${BASENAME}"
+        if [ $? -eq 0 ]; then
+            colorize_nl $S_SUCCESS "The master boot record was erased!"
+            colorize_nl $S_FAILURE "Rebooting machine in 5 seconds..."
+            sleep 5
+        fi
+    else
+        colorize_nl $S_FAILURE "String [Y|y] not entered;"
+        colorize_nl $S_FAILURE "Rebooting machine in 15 seconds..."
+        sleep 15
+    fi
+    reboot -f
+    ;;
+  stop)
+    colorize $S_TIP "Stopping $DESC"
+    ;;
+  restart|force-reload)
+     $0 stop
+     $0 start
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

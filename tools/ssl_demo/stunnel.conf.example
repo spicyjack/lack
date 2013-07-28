@@ -1,0 +1,55 @@
+; stunnel config file for farkhttpd.pl, based on
+; sample stunnel configuration file by Michal Trojnara 2002-2005
+; $Id: stunnel.conf.example,v 1.2 2007-03-26 02:08:45 brian Exp $
+; Some options used here may not be adequate for your particular configuration
+; Please make sure you understand them (especially the effect of chroot jail)
+
+; Certificate/key is needed in server mode and optional in client mode
+; use pem encoded certificates
+key = /Users/brian/Documents/cvs/antlinux/scripts/ssl_demo/ff.antlinux-key.pem.nopass
+cert = /Users/brian/Documents/cvs/antlinux/scripts/ssl_demo/ff.antlinux-cert.pem
+
+; Some security enhancements for UNIX systems - comment them out on Win32
+;chroot = /usr/var/stunnel/
+;setuid = stunnel4
+;setgid = stunnel4
+; PID is created inside chroot jail
+;foreground = yes
+pid = /Users/brian/Documents/cvs/antlinux/scripts/ssl_demo/stunnel.pid
+
+; Some performance tunings
+socket = l:TCP_NODELAY=1
+socket = r:TCP_NODELAY=1
+;compression = zlib
+;compression = rle
+
+; Workaround for Eudora bug
+;options = DONT_INSERT_EMPTY_FRAGMENTS
+
+; Authentication stuff
+;verify = 2
+; Don't forget to c_rehash CApath;  CApath is located inside chroot jail:
+;CApath = /certs
+; It's often easier to use CAfile:
+;CAfile = /usr/etc/stunnel/certs.pem
+; Don't forget to c_rehash CRLpath;  CRLpath is located inside chroot jail:
+;CRLpath = /crls
+; Alternatively you can use CRLfile:
+;CRLfile = /usr/etc/stunnel/crls.pem
+
+; Some debugging stuff useful for troubleshooting
+debug = 7
+output = /Users/brian/Documents/cvs/antlinux/scripts/ssl_demo/stunnel.log
+
+; Use it for client mode
+;client = yes
+client = no
+
+; Service-level configuration
+
+[https]
+accept  = 24443
+connect = 24824
+TIMEOUTclose = 0
+
+; vim:ft=dosini

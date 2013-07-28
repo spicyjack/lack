@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# $Id: webserver,v 1.7 2008-01-31 19:59:22 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+# FIXME
+# - allow for changing the HTTP port via /proc/cmdline or a config file
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BINARY="/usr/sbin/thttpd"
+[ -x "$BINARY" ] || exit 0
+DESC="Webserver"
+BASENAME=$(/usr/bin/basename $BINARY)
+HTTPD_PORT=27448 # (2-shit)
+BINARY_OPTS=""
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    exit 0
+  ;;
+  start)
+    colorize $S_INFO "$BASENAME: Starting $DESC"
+    $BINARY $BINARY_OPTS
+    check_exit_status $? "$BASENAME: Starting $DESC"
+    ;;
+  stop)
+    colorize $S_INFO "$BASENAME: Stopping $DESC"
+    HTTPD_PID=$(cat /var/run/webserver.pid)
+    /bin/kill $HTTPD_PID
+    check_exit_status $? "$BASENAME: Stopping $DESC"
+    ;;
+  restart|force-reload)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: webserver {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

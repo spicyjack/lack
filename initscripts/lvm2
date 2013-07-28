@@ -1,0 +1,71 @@
+#!/bin/sh
+
+# $Id: lvm2,v 1.12 2008-01-25 01:36:04 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+BASENAME="lvm2"
+ACTION=$1
+DESC="Logical Volume Manager"
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    echo "cmdline - volgrp; volume group to activate"
+    exit 0
+  ;;
+  start)
+    file_parse "/proc/cmdline" "volgrp"
+    VOL_GRP=$PARSED
+    # pass the name of the volume back out for other scripts to use
+    if [ "x$VOL_GRP" != "xno" -o "x$VOL_GRP" != "xNO" ]; then
+        # scan for volumes first
+        colorize $S_TIP "${BASENAME}: scanning for logical volumes;"
+        /sbin/vgscan >> $DEBUG_LOG 2>&1
+        check_exit_status $? "${BASENAME}: scanning for logical volumes;"
+        # now activate volumes
+        if [ "x$VOL_GRP" != "x" ]; then
+            # activate a specific volume
+            # root device will be concatenated using vol_grp/rootvol
+            colorize $S_TIP "${BASENAME}: enabling volume group ${VOL_GRP};"
+            /sbin/vgchange -ay --ignorelockingfailure $VOL_GRP \
+                >> $DEBUG_LOG 2>&1
+            check_exit_status $? "$BASENAME: enabling volume group ${VOL_GRP}"
+        else
+            # activate all volumes, the root= parameter should point to the
+            # exact root device
+            colorize $S_TIP "${BASENAME}: enabling all volume groups;"
+            /sbin/vgchange -ay --ignorelockingfailure >> $DEBUG_LOG 2>&1
+            check_exit_status $? "$BASENAME: enabling all volume groups"
+        fi
+    else
+        colorize $S_INFO "${BASENAME}: 'volgrp=no' parameter found "
+        colorize_nl $S_INFO "in /proc/cmdline"
+        colorize_nl $S_INFO "${BASENAME}: Skipping activation of LVM groups"
+    fi
+    ;;
+  stop)
+    # noop
+    :
+    ;;
+  restart|force-reload)
+    # noop
+    :
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload|vars}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

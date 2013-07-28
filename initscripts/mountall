@@ -1,0 +1,97 @@
+#!/bin/sh
+
+# $Id: mountall,v 1.4 2009-06-26 07:31:22 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+# picks up things like colorize()
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BINARY=/bin/mount
+[ -x "$BINARY" ] || exit 1
+BASENAME="mountall"
+BINARY_OPTS="-r -c"
+MP3_FILELIST="/tmp/foundlist.m3u"
+
+case "$ACTION" in
+  vars)
+    # echo out what commandline variables are parsed by this script
+    echo "${BASENAME}:"
+    exit 0
+  ;;
+  start)
+    colorize_nl $S_TIP "$BASENAME: Checking for CD-ROM Devices..."
+    CDROM_DEV=$(/sbin/udevadm info --query=name --name=cdrom)
+    if [ $? -gt 0 ]; then
+        colorize_nl "$BASENAME: udevadm can't find CD-ROM device;"
+        colorize_nl "$BASENAME: skipping CD-ROM mounting"
+    else
+        colorize $S_TIP "$BASENAME: Mounting /dev/$CDROM_DEV"
+        $BINARY -t iso9660 -o ro /dev/$CDROM_DEV /mnt/cdrom
+        check_exit_status $? "$BASENAME: Mounting /dev/$CDROM_DEV"
+        if [ $? -eq 0 ]; then
+            # the mount worked, so run a find on the CD-ROM drive now
+            find /mnt/cdrom -type f -iname "*.mp3" -o -iname "*.ogg" \
+                >> $MP3_FILELIST
+        fi
+    fi # if [ $? -gt 0 ];
+
+    colorize_nl $S_TIP "$BASENAME: Checking for Disk/Thumbdrive Devices..."
+    for DISK in hda hdb hdc hdd sda sdb sdc sdd sde sdf sdg; do
+        # skip testing the CD-ROM device
+        if [ "x$DISK" = "x$CDROM_DEV" ]; then
+            continue
+        fi
+        # skip devices that are already mounted for whatever reason
+        if [ $(/bin/grep -c $DISK /proc/mounts) -gt 0 ]; then
+            continue
+        fi
+        # we only care about the exit code; redirect output to /dev/null
+        /sbin/udevadm info --query=name --name=${DISK} >/dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            PARTITIONS=$(cat /proc/partitions | /bin/grep ${DISK} \
+                | grep -v "${DISK}$" | /usr/bin/awk '{print $4}')
+            for MNT_POINT in $(echo ${PARTITIONS}); do
+                mkdir /mnt/$MNT_POINT
+                colorize $S_TIP "$BASENAME: Mounting /dev/${MNT_POINT}"
+                $BINARY -t auto -o ro /dev/$MNT_POINT \
+                    /mnt/$MNT_POINT >> $DEBUG_LOG 2>&1
+                check_exit_status $? "$BASENAME: Mounting /dev/${MNT_POINT}"
+                if [ $? -eq 0 ]; then
+                    find /mnt/$MNT_POINT -type f \
+                        -iname "*.mp3" -o -iname "*.ogg" >> $MP3_FILELIST
+                fi
+            done # for MNT_POINT in $(echo ${PARTITIONS});
+        fi # if [ $? -eq 0 ];
+    done # for DISK in hda hdb hdc hdd sda sdb sdc sdd sde sdf sdg
+    ;; # start)
+  stop)
+    #colorize $S_TIP "Unmounting all filesystems"
+    echo "Unmounting all device-backed filesystems"
+    for MOUNT in $(cat /proc/mounts | awk '{print $1}' | grep "^/dev");
+    do
+        echo " - $MOUNT"
+        /bin/umount $MOUNT
+        check_exit_status $? "$BASENAME: unmounting ${MOUNT}"
+    done
+    ;; # stop)
+  restart|force-reload)
+     $0 stop
+     $0 start
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

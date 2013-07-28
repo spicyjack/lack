@@ -1,0 +1,50 @@
+! comments are marked with an exclamation point at the beginning of the line
+# requires a c-preprocessor (cpp)
+##ifdef COLOR
+*customization: -color
+##endif
+
+! mrxvt settings (mrxvt == multi-tab rxvt)
+! size
+mrxvt*geometry: 80x25
+! settings to do with tabs and special features
+mrxvt*saveLines: 2000
+mrxvt*transparent: True
+mrxvt*backgroundFade: 50
+mrxvt*fading: 0
+mrxvt*transparentScrollbar: True
+mrxvt*transparentTabbar: True
+! colors
+mrxvt*foreground: White
+mrxvt*background: Black
+mrxvt*cursorColor: red
+mrxvt*tabForeground: green
+mrxvt*iTabForeground: DarkSlateGrey
+! fonts
+!mrxvt*font: -xos4-terminus-bold-r-normal--24-240-72-72-c-120-iso10646-1
+!mrxvt*xft: True
+mrxvt*font: -xos4-terminus-bold-r-normal--14-*-*-*-*-*-iso10646-1
+mrxvt*mfont: -xos4-terminus-bold-r-normal--14-*-*-*-*-*-iso10646-1
+!mrxvt*font: -xos4-terminus-bold-r-normal--20-200-72-72-c-100-iso10646-1
+
+!Xterm resources
+xterm*background: Black
+xterm*foreground: White
+xterm*cursorColor: Red
+xterm*reverseVideo: false
+xterm*scrollBar: true
+xterm*saveLines: 2000
+xterm*reverseWrap: true
+!xterm*font: 9x15
+Xterm*font: 9x15
+!xterm*font: -xos4-terminus-bold-r-normal--20-200-72-72-c-100-iso10646-1
+!xterm*font: -xos4-terminus-*-r-normal--17-120-100-100-c-0-iso10646-1
+xterm*font: -xos4-terminus-bold-r-normal--14-*-*-*-*-*-iso10646-1
+xterm*fullCursor: true
+xterm*scrollTtyOutput: off
+xterm*scrollKey: on
+xterm*VT100.Translations: #override\n\
+	<KeyPress>Prior : scroll-back(1,page)\n\
+	<KeyPress>Next : scroll-forw(1,page)
+xterm*titleBar: false
+xterm*geometry: 80x25

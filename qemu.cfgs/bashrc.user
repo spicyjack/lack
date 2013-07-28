@@ -1,0 +1,135 @@
+#!/bin/sh
+# .bashrc
+
+# User specific aliases and functions
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# add the user's .dir_colors directives
+eval $(/usr/bin/dircolors ~/.dir_colors)
+
+# and user aliases too
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias vi='/usr/bin/vim'
+alias dir='ls --color=tty --classify'
+alias imageinfo='/usr/bin/perl ~/src/perl-hg/imageinfo.pl'
+alias rotate='/usr/bin/perl ~/cvs/perl_scripts/rotate.pl'
+alias filerenamer='/usr/bin/perl ~/src/perl-hg/file_renamer.pl'
+
+PS1='[\h][\u \W]\\$ '
+
+CVSROOT=/home/cvs
+CVS_RSH=/usr/bin/ssh
+RSYNC_RSH=/usr/bin/ssh
+EDITOR=/usr/bin/vim
+PATH=~/bin:$PATH:/usr/games:/usr/local/games
+#all_proxy="http://127.0.0.1:3128"
+#no_proxy="localhost"
+
+export PS1 CVSROOT MAILPATH CVS_RSH EDITOR PATH
+#CVSROOT MAILPATH CVS_RSH EDITOR PATH all_proxy no_proxy
+
+# define some handy shell functions
+ff () { 
+	find . -name "*$1*" -print
+} #find file from here 
+
+histgrep () {
+    history | grep "$@" | tail -22 
+}   # history, one screenful please 
+
+find_agent () {
+    /usr/bin/find /tmp 2>/dev/null | grep agent
+} # find a list of agent sockets on the host
+
+pigfind () {
+    find . -maxdepth 1 -type d -exec du -s '{}' \; 2>/dev/null | sort -n
+} # get the sizes of the subdirectories of $PWD, sort from smallest to largest
+
+jdate () {
+    echo -n "The current julian date in GMT is: "
+    TZ=GMT date +%j
+}
+
+purlget () {
+        wget --http-user=speak --http-password=friend $1
+} # retrieves files from purl
+
+SOURCE_DIR="$HOME/src"
+hgstat () {
+    START_DIR=$PWD
+    cd $SOURCE_DIR
+    for DIR in $(/bin/ls | grep hg);
+    do
+        echo "=== hg status: $DIR ===";
+        cd $DIR
+        hg status
+        cd ..;
+    done
+    cd $START_DIR
+} # check the status in mercurial directories
+
+hgpullall () {
+    START_DIR=$PWD
+    cd $SOURCE_DIR
+    for DIR in $(/bin/ls | grep hg);
+    do
+        echo "=== hg pull: $DIR ===";
+        cd $DIR
+        IFS=$' \t'
+        HG_OUTPUT=$(hg pull -u)
+        # if the string 'no changes found' was not listed in the output...
+        if [ $(echo $HG_OUTPUT | grep -c "no changes found") -ne 1 ]; then
+            echo $HG_OUTPUT
+        fi
+        cd ..;
+        IFS=$' \t\n'
+    done
+    cd $START_DIR
+} # hg pull in all mercurial directories
+
+hginchk () {
+    START_DIR=$PWD
+    cd $SOURCE_DIR
+    for DIR in $(/bin/ls | grep hg);
+    do
+        echo "=== hg incoming: $DIR ===";
+        cd $DIR
+        IFS=$' \t'
+        HG_OUTPUT=$(hg incoming)
+        # if the string 'no changes found' was not listed in the output...
+        if [ $(echo $HG_OUTPUT | grep -c "no changes found") -ne 1 ]; then
+            echo $HG_OUTPUT
+        fi
+        IFS=$' \t\n'
+        cd ..
+    done
+    cd $START_DIR
+} # check for inbound changes to mercurial directories
+
+hgoutchk () {
+    START_DIR=$PWD
+    cd $SOURCE_DIR
+    for DIR in $(/bin/ls | grep hg);
+    do
+        echo "=== hg outgoing: $DIR ===";
+        cd $DIR
+        IFS=$' \t'
+        HG_OUTPUT=$(hg outgoing)
+        # if the string 'no changes found' was not listed in the output...
+        if [ $(echo $HG_OUTPUT | grep -c "no changes found") -ne 1 ]; then
+            echo $HG_OUTPUT
+        fi
+        IFS=$' \t\n'
+        cd ..;
+    done
+    cd $START_DIR
+} # check for outbound changes in mercurial directories
+
+# vi: set ft=sh sw=4 ts=4
+# fin!

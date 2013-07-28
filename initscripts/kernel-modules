@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# $Id: kernel_modules,v 1.14 2009-07-16 00:23:49 brian Exp $
+# Copyright (c)2007 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BINARY=/sbin/modprobe
+[ -x "$BINARY" ] || exit 0
+BASENAME="kernel-modules"
+DESC="Loading kernel modules;"
+BINARY_OPTS=""
+MODULES_FILE="/etc/modules"
+
+if [ ! -r $MODULES_FILE ]; then
+    echo "ERROR: modules file $MODULES_FILE not found"
+    check_exit_status 1 $BASENAME
+fi # if [ ! -r $MODULES_FILE ]
+
+case "$ACTION" in
+  vars)
+    echo "${BASENAME}:"
+    exit 0
+  ;;
+  start)
+    colorize_nl $S_TIP "${BASENAME}: $DESC"
+    for MODULE in $(cat $MODULES_FILE | grep -v "^#");
+    do
+        colorize $S_TIP "  - $MODULE"
+        $BINARY $BINARY_OPTS $MODULE >> $DEBUG_LOG 2>&1
+        check_exit_status $? $BASENAME
+    done
+    colorize_nl $S_TIP "${BASENAME}: All kernel modules in /etc/modules loaded"
+    ;;
+  stop)
+    # noop
+    :
+    ;;
+  restart|force-reload)
+    # noop
+    :
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!

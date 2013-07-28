@@ -1,0 +1,105 @@
+#!/bin/sh
+
+# squashfs_stow
+# Copyright (c)2010 Brian Manning <brian at portaboom dot com>
+
+# PLEASE DO NOT E-MAIL THE AUTHOR ABOUT THIS SOFTWARE
+# The proper venue for questions is the LACK mailing list at:
+# http://groups.google.com/linuxack or <linuxack.googlegroups.com>
+
+# stow squashfs files mounted in /pkgs
+
+# picks up things like colorize()
+if ! [ -e $LACK_FUNCTIONS ]; then
+    LACK_FUNCTIONS="/etc/scripts/lack_functions.sh"
+fi # if ! [ -e $LACK_FUNCTIONS ]
+source $LACK_FUNCTIONS
+
+ACTION=$1
+BASENAME="squashfs_stow"
+
+stow_package () {
+    local PACKAGE_PATH=$1
+    local EXIT_STATUS=0
+    cd $PACKAGE_PATH
+    PKG=$(basename ${PACKAGE_PATH})
+    colorize $S_TIP "${BASENAME}: stowing $PKG"
+    for PKG_DIR in $(/bin/ls -1);
+    do
+        if [ $(echo ${PKG_DIR} | /bin/egrep -c 'etc$|var$') -gt 0 ]; then
+            # recursive copy of all files into the etc directory
+            echo "Copying ${PKG}/${PKG_DIR} to /${PKG_DIR}" >> $DEBUG_LOG
+            /bin/cp -av ${PKG_DIR}/* /${PKG_DIR} >> $DEBUG_LOG
+            check_exit_error \
+                $? "Copying of '${PKG_DIR}' files from package $PKG"
+            EXIT_STATUS=$?
+        else
+            # stow files from this directory into the same directory in the
+            # root filesystem
+            echo "Stowing ${PKG}/${PKG_DIR} to /" >> $DEBUG_LOG
+            /usr/bin/perl /usr/bin/stow -v \
+                -t /${PKG_DIR} ${PKG_DIR} >> $DEBUG_LOG
+            check_exit_error $? "Copying of ${PKG_DIR} files from package $PKG"
+            EXIT_STATUS=$?
+        fi # if [ $(echo ${PKG_DIR} | /bin/grep -c 'etc$') -gt 0 ];
+    done # for $PKG_DIR in $STOW_DIRS
+    check_exit_status $EXIT_STATUS "${BASENAME}: stowing ${PKG}"
+} # stow_package
+
+case "$ACTION" in
+  vars)
+    # echo out what commandline variables are parsed by this script
+    echo "${BASENAME}:"
+    exit 0
+  ;;
+  start)
+    OLD_DIR=$PWD
+    colorize_nl $S_TIP "${BASENAME}: Stowing all mounted squashfs archives..."
+    colorize $S_TIP "${BASENAME}: Initial stow of perl + stow..."
+    PERL_PATH=$(/bin/ls -d /pkgs/perl*)
+    # this should get us just the perl directory
+    PERL_PKG=$(basename /pkgs/perl*)
+    # some gymnastics required in order to set up the environment so stow can
+    # run
+    cd /pkgs
+    PERL5LIB=${PERL_PATH}/usr/lib/perl:${PERL_PATH}/usr/share/perl \
+        ${PERL_PATH}/usr/bin/perl ${PERL_PATH}/usr/bin/stow \
+        -v -t / $PERL_PKG >> $DEBUG_LOG
+    check_exit_status $? "stowing of perl + stow"
+    for STOW_PKG in $(find /pkgs -maxdepth 1 -type d \
+        | grep -v '^/pkgs$' | sort);
+    do
+        # don't stow the perl package again
+        if [ $(echo $STOW_PKG | /bin/grep -c "^perl") -gt 0 ]; then
+            continue
+        fi
+        stow_package $STOW_PKG
+    done
+    cd $OLD_DIR
+    ;;
+  stop)
+    colorize_nl $S_TIP "${BASENAME}: Unstowing packages..."
+    cd /pkgs
+    for UNSTOW in $(ls -1); do
+        if [ $(echo $UNSTOW | /bin/grep -c "^perl") -gt 0 ]; then
+            continue
+        fi
+        colorize $S_TIP " - ${UNSTOW}"
+        /usr/bin/stow -v -D $UNSTOW >> $DEBUG_LOG
+        check_exit_status $? "unstowing of ${UNSTOW}"
+    done
+    /usr/bin/stow -D perl.*
+    ;;
+  restart|force-reload)
+     $0 stop
+     $0 start
+    ;;
+  *)
+    echo "Usage: $BASENAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
+# vi: set shiftwidth=4 tabstop=4 filetype=sh :
+# конец!
