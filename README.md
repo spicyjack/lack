@@ -6,8 +6,7 @@ installation, and build minimized "packages" that can then be used on
 and run completely in RAM.
 
 ## Other LACK-related Projects ##
-- [Main Project](https://github.com/spicyjack/lack)
-  - This project
+- [Main Project](https://github.com/spicyjack/lack)  (This project)
   - Contains scripts to be used with the `initramfs` image, tools scripts,
     sample config files from `/etc`, sample `dialog` menu scripts, and sample
     config files for use with the web server `thttpd`.
