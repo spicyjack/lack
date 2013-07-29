@@ -92,6 +92,10 @@ if [ $DEBUG ]; then
     want_shell
 fi # if [ "x$DEBUG" != "x" ];
 
+# see if a "stop" script was specified
+file_parse "/proc/cmdline" "stopscript"
+STOPSCRIPT=$PARSED
+
 # this will run all of the start scripts in order
 # HINT: if you want to run init here, instead of exec'ing switch_root below,
 # then add bbinit to your initscript list in your <project>_base.txt file
@@ -106,6 +110,10 @@ for INITSCRIPT in /etc/start/*; do
     fi
     # was a pause asked for?
     pause_prompt
+    ACTUAL_INITSCRIPT=$(readlink -n -f $INITSCRIPT)
+    if [ "x$ACTUAL_INITSCRIPT" == "x$STOPSCRIPT" ]; then
+        exec /etc/init.d/run-program start
+    fi
 done
 
 # the run-program script needs to be exec'ed to pass PID=1 to init
