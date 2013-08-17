@@ -1,29 +1,21 @@
 #!/bin/bash
 
 # make_initramfs.sh
-# Copyright (c)2006 Brian Manning <brian at portaboom dot com>
+# Copyright (c)2006, 2009-2013 Brian Manning <brian at xaoc dot org>
 # License: GPL v2 (see licence blurb at the bottom of the file)
-# Get support and more info about this script at:
-# http://code.google.com/p/lack/
-# http://groups.google.com/group/linuxack|linuxack@googlegroups.com
-
-# DO NOT CONTACT THE AUTHOR DIRECTLY; use the mailing list please
 
 # script to generate initramfs images based on lists of files you pass to it;
 # the script compiles many small lists into one large list, and then feeds
 # that to 'gen_init_cpio', which creates the initramfs file
 
+# Get support and more info about this script at:
+# https://github.com/spicyjack/lack
+# https://github.com/spicyjack/lack/issues
+# http://groups.google.com/group/linuxack|linuxack@googlegroups.com
+
+# DO NOT CONTACT THE AUTHOR DIRECTLY; use the mailing list please
+
 # TODO
-# - create a clean_up function that removes files/directories that were
-# created by this script; any other function that wants to exit after an error
-# calls the cleanup function first
-# - fall back to cpio/afio if gen_cpio_image doesn't exist
-# - add detection of 'requirements' in the recipe files so that dependencies
-# can be detected and added to the initramfs image as needed; run the
-# 'dependencies' list through uniq to filter duplicates
-# - add a 'dependencies list' option which would go through all of the recipe
-# files and list the dependencies for each file in order to build a master list
-# of dependencies
 
 # minimum config version required to work with this script
 INITRAMFS_CFG_REQUIRED_VERSION=2
@@ -36,7 +28,7 @@ LACK_HARDLINK_INITRD=0 # don't hardlink the initramfs to the initrd file
 # this is the top level directory; all of the paths created below start from
 # this directory and then work down the directory tree; this variable can be
 # overridden with the --basedir switch
-BUILD_BASE="/home/lack/src/lack.hg"
+BUILD_BASE="/home/lack/src/lack"
 # the list of files output and fed to gen_init_cpio
 FILELIST="initramfs-filelist.txt"
 PROJECT_LIST="project-filelist.txt"
