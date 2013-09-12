@@ -30,11 +30,16 @@ PROMPT=$PARSED
 
 if [ "x$PROMPT" = "xno" ]; then
     exit 0
-fi # if [ "x$PROMPT" != "xno" ]
+elif [ "x$PROMPT" = "x" ]; then
+    # use volgrp instead of prompt
+    file_parse "/proc/cmdline" "volgrp"
+    PROMPT=$PARSED
+fi
+KEY_DIR=$PROMPT
 
 # a default for the AES keylength
 # BOOTCHEAT aeskey= - AES encryption key length; [128|192|256] bits
-AESKEY="128"
+AESKEY="256"
 file_parse "/proc/cmdline" "aeskey"
 if [ ! -z $PARSED ]; then
     AESKEY=$PARSED
@@ -79,17 +84,7 @@ case "$ACTION" in
     # BOOTCHEAT thumbdev= - device where the disk keys are stored
     file_parse "/proc/cmdline" "thumbdev"
     THUMB_DEV=$PARSED
-    #HOSTNAME=$(/bin/cat /etc/hostname | /usr/bin/tr -d '\n')
-    get_hostname # from lack_functions
-    # allow for alternate key directories
-    # FIXME change this to try for a directory with the same name as the
-    # volume group first, then use the hostname, then give up if neither are
-    # set
-    if [ "x${PROMPT}" != "x" ]; then
-        KEY_DIR=$PROMPT
-    else
-        KEY_DIR=$HOSTNAME
-    fi
+
     KEY_MOUNT="/mnt/flash/keyhosts"
     # write a pid file so we can be killed by the web script if necessary
     write_child_pid $BASENAME $$
