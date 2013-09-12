@@ -19,16 +19,16 @@ BINARY=/bin/sed
 BASENAME="generate-fstab"
 
 # grab the volume ID
-file_parse "/proc/cmdline" "prompt"
-PROMPT=$PARSED
+file_parse "/proc/cmdline" "volgrp"
+VOLGRP=$PARSED
 # double check that the prompt command line option was used
-if [ "x$PROMPT" = "X" ]; then
+if [ "x$VOLGRP" = "X" ]; then
     colorize $S_FAILURE "ERROR: 'prompt' not found on kernel command line"
     colorize $S_FAILURE "ERROR: Use the 'prompt' option to pass volume ID"
     colorize $S_FAILURE "ERROR: of encrypted volume at the system boot prompt"
     exit 1
 fi
-DESC="Generating fstab file with vol ID ${PROMPT}: "
+DESC="Generating fstab file with vol ID ${VOLGRP}: "
 
 case "$ACTION" in
   vars)
@@ -38,7 +38,7 @@ case "$ACTION" in
   ;;
   start)
     colorize $S_TIP "${BASENAME}: ${DESC}"
-    /bin/cat /etc/fstab.template | $BINARY "s/XXXXXXXX/${PROMPT}/" \
+    /bin/cat /etc/fstab.template | $BINARY "s/XXXXXXXX/${VOLGRP}/" \
         > /etc/fstab
     check_exit_status $? $BASENAME
     ;;
