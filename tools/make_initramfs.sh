@@ -27,8 +27,8 @@ QUIET=1 # 0 = no output, 1 = some output, 2 = noisy
 LACK_HARDLINK_INITRD=0 # don't hardlink the initramfs to the initrd file
 # this is the top level directory; all of the paths created below start from
 # this directory and then work down the directory tree; this variable can be
-# overridden with the --basedir switch
-BUILD_BASE="/home/lack/src/lack"
+# overridden with the --lackdir switch
+LACK_BASE="/home/lack/src/lack/lack.git"
 # the list of files output and fed to gen_init_cpio
 FILELIST="initramfs-filelist.txt"
 PROJECT_LIST="project-filelist.txt"
@@ -122,7 +122,7 @@ function sedify ()
         "{
         s!:LACK_PROJECT_NAME:!${LACK_PROJECT_NAME}!g;
         s!:PROJECT_DIR:!${PROJECT_DIR}!g;
-        s!:BUILD_BASE:!${BUILD_BASE}!g;
+        s!:LACK_BASE:!${LACK_BASE}!g;
         s!:VERSION:!${KERNEL_VER}!g;
         s!:TEMP_DIR:!${TEMP_DIR}!g;
         s!:LACK_WORK_DIR:!${LACK_WORK_DIR}!g;
@@ -132,7 +132,7 @@ function sedify ()
 function show_vars()
 {
     echo "variables:"
-    echo "BUILD_BASE=${BUILD_BASE}"
+    echo "LACK_BASE=${LACK_BASE}"
     echo "KERNEL_VER=${KERNEL_VER}"
     echo "LACK_PROJECT_NAME=${LACK_PROJECT_NAME}"
     echo "PROJECT_DIR=${PROJECT_DIR}"
@@ -143,31 +143,30 @@ function show_vars()
 function show_help () {
 cat <<-EOF
 
-  $SCRIPTNAME [options] --basedir --project
+  $SCRIPTNAME [options] --lackdir --project
 
   -or-
 
-  $SCRIPTNAME [options] --basedir --projectdir
+  $SCRIPTNAME [options] --recipes --project
 
-  SCRIPT OPTIONS
-  -b|--base         Base directory for project files and recipes
-  -d|--dir          Directory for the project files, if not in --basedir
-  -p|--project      Name of the project to build an initramfs image for
-                    Subdirectory under --basedir; use --projectdir if the
-                    project directory is not in --basedir
-
+  HELP OPTIONS
   -h|--help         Displays script options
   -e|--examples     Displays examples of script usage
   -H|--longhelp     Displays script options, environment vars and examples
   -n|--dry-run      Builds filelists but does not run 'gen_init_cpio'
 
+  SCRIPT REQUIRED ARGUMENTS
+  -r|--recipes      Directory holding recipes used to for initramfs filelist
+  -p|--project      Directory with project 'initramfs.cfg' and local recipes
+
+  SCRIPT OPTIONAL ARGUMENTS
   -f|--varsfile     File to read in to set script environment variables
   -s|--showvars     List variables set in the --project stanza
   -o|--output       Filename to write the initramfs image to
   -q|--quiet        No script output (unless an error occurs)
-  -l|--hardlink     Create hardlink from 'initrd' to initramfs file
+  --hardlink     Create hardlink from 'initrd' to initramfs file
   -k|--keep         Don't delete the created initramfs filelist/init.sh script
-  -w|--work         Directory to use for working files (default: /tmp)
+  -w|--work         Directory to use for working files (default: /dev/shm)
 EOF
 } # function show_help ()
 
@@ -182,18 +181,15 @@ cat <<-EOF
     inside the script itself, or in an external file that gets sourced with
     --varsfile) in order to function correctly:
 
-    BUILD_BASE:
+    RECIPE_DIR
         the path containing the project files and recipe files; set globally
         above, but can be overridden on a per-project basis
+    PROJECT_DIR: directory to look in for initramfs filelist, project
+        configuration file, local recipes, and support scripts
     KERNEL_VER:
         the kernel version number, used in specifying the kernel module
         directory to add kernel modules from, as well as being part of the
         name of the output initramfs file (initramfs-KERNEL_VER.cpio.gz)
-    LACK_PROJECT_NAME:
-        directory to append to BUILD_BASE in order to find initramfs
-        filelist, project configuration file and support scripts
-    PROJECT_DIR: directory to look in for initramfs filelist, project
-        configuration file and support scripts
     RECPIES:
         a quoted, whitespace-separated list of packages to include in the
         final initramfs image; each package's recipe is used when building the
@@ -211,21 +207,18 @@ cat <<-EOF
 
     Normal usage:
 
-    # project directory is underneath base directory
-    sh $SCRIPTNAME --basedir /path/to/base --project projectname
+    bash ${SCRIPTNAME} --recipes /path/to/recipes --project /path/to/project
 
-    # project directory somewhere else on the disk
-    sh $SCRIPTNAME --basedir /path/to/base --projectdir /path/to/project/dir
+    # Output all of the important environment variables for a profile; you
+    # can edit these and then use them in place of a built-in profile;
 
-    Output all of the important environment variables for a profile; you
-    can edit these and then use them in place of a built-in profile;
+    bash ${SCRIPTNAME} --project /path/to/project --showvars \
+        > projectvars.txt
 
-    sh make_initramfs.sh --project projectname --showvars > projectvars.txt
-
-    Now use edit this environment variables file, and then use it to generate
-    an initramfs image:
-
-    sh make_initramfs.sh --varsfile projectvars.txt --nohardlink --keepfiles
+    # Now use edit this environment variables file, and then use it to
+    # generate an initramfs image:
+    bash ${SCRIPTNAME} --varsfile projectvars.txt \
+        --nohardlink --keepfiles
 
 EOF
 } # function show_examples ()
@@ -234,7 +227,7 @@ EOF
 # run getopt
 TEMP=$(${GETOPT} -o hHenp:d:f:sb:o:qlkw: \
 --long help,longhelp,examples,dry-run,project:,projectdir:,dir: \
---long varsfile:,showvars,basedir:,base:,output:,quiet,hardlink \
+--long varsfile:,showvars,recipes:,recipies-dir:,output:,quiet,hardlink \
 --long keeplist,keepfiles,keep,workdir:,work: \
 -n "${SCRIPTNAME}" -- "$@")
 check_exit_status $? $GETOPT
@@ -282,12 +275,12 @@ while $TRUE; do
         -s|--showvars) # list variables after reading them in
             SHOWVARS=1
             shift
-            ;; # --quiet
-        -b|--basedir|--base)
+            ;;
+        -b|--lackdir|--base)
             # base directory for projects, project files and recipes
-            BUILD_BASE=$2
+            LACK_BASE=$2
             shift 2
-            ;; # --basedir
+            ;;
         -d|--projectdir|--dir)
             # project directory, or a directory located outside of base dir
             # above
@@ -304,8 +297,9 @@ while $TRUE; do
             QUIET=0
             shift
             ;; # --quiet
-        -l|--hardlink) # hardlink the new initramfs file to initrd for the
-                    # update-grub script to work properly
+        # hardlink the new initramfs file to initrd for the
+        # update-grub script to work properly
+        --hardlink)
             LACK_HARDLINK_INITRD=1
             shift
             ;; # --initrd
@@ -343,11 +337,11 @@ fi
 
 # verify the build directory exists
 # the variable is hardcoded at the top of this script
-echo -n "- Checking for build base directory (${BUILD_BASE}); "
-if [ ! -d $BUILD_BASE ]; then
+echo -n "- Checking for build base directory (${LACK_BASE}); "
+if [ ! -d $LACK_BASE ]; then
     echo
     echo "ERROR: build base directory doesn't exist"
-    echo "(${BUILD_BASE})"
+    echo "(${LACK_BASE})"
     exit 1
 fi
 echo "found!"
@@ -369,16 +363,16 @@ fi # if [ "x$PROJECT_DIR" != "x" ]
 # if the project name was used, see if it exists
 if [ "x$LACK_PROJECT_NAME" != "x" ]; then
     echo -n "- Checking for project '${LACK_PROJECT_NAME}' in base dir; "
-    if [ ! -d $BUILD_BASE/builds/$LACK_PROJECT_NAME ]; then
+    if [ ! -d $LACK_BASE/builds/$LACK_PROJECT_NAME ]; then
         echo
         echo "ERROR: --project specified, but project directory does not exist"
-        echo "ERROR: directory: ${BUILD_BASE}/builds/${LACK_PROJECT_NAME}"
+        echo "ERROR: directory: ${LACK_BASE}/builds/${LACK_PROJECT_NAME}"
         exit 1
-    fi # if [ ! -d $BUILD_BASE/builds/$LACK_PROJECT_NAME ]
+    fi # if [ ! -d $LACK_BASE/builds/$LACK_PROJECT_NAME ]
     echo "found!"
     # the project directory was passed in and it's valid
     # set it
-    PROJECT_DIR=$BUILD_BASE/builds/$LACK_PROJECT_NAME
+    PROJECT_DIR=$LACK_BASE/builds/$LACK_PROJECT_NAME
 fi
 
 # no sense in running if gen_init_cpio doesn't exist
@@ -412,7 +406,7 @@ echo "- Created temporary directory '${TEMP_DIR}'"
 ### EXPORTS
 # export things that were set up either in getopts or hardcoded into this
 # script
-export BUILD_BASE PROJECT_DIR TEMP_DIR FILELIST PROJECT_LIST LACK_WORK_DIR
+export LACK_BASE PROJECT_DIR TEMP_DIR FILELIST PROJECT_LIST LACK_WORK_DIR
 
 # build the header for the filelist
 echo "# Begin $FILELIST;" >> $TEMP_DIR/$FILELIST
@@ -455,18 +449,18 @@ do
     # verify the recipe file exists
     # check in $PROJECT_DIR first; note this works even if
     # $PROJECT_DIR is not defined; if it's not defined, it will fail, and
-    # the check in $BUILD_BASE will then be done
+    # the check in $LACK_BASE will then be done
     if [ -r $PROJECT_DIR/recipes/$RECIPE.txt ]; then
         # project-specific recpie exists
         RECIPE_DIR="$PROJECT_DIR/recipes"
     else
-        if [ -r $BUILD_BASE/recipes/$RECIPE.txt ]; then
+        if [ -r $LACK_BASE/recipes/$RECIPE.txt ]; then
             # recipe exists in LACK recipes directory
-            RECIPE_DIR="$BUILD_BASE/recipes"
+            RECIPE_DIR="$LACK_BASE/recipes"
         else
             # nope; delete the output file and exit
             echo "ERROR: ${RECIPE}.txt file does not exist in"
-            echo "${BUILD_BASE}/recipes (common) directory or"
+            echo "${LACK_BASE}/recipes (common) directory or"
             echo "${PROJECT_DIR}/recipes (project-specific) directory"
             echo "- Deleting output file ${OUTPUT_FILE}"
             rm $OUTPUT_FILE
