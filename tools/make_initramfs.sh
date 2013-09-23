@@ -161,6 +161,7 @@ cat <<-EOF
   -p|--project      Directory with project 'initramfs.cfg' and local recipes
 
   SCRIPT OPTIONAL ARGUMENTS
+  -l|--lack-base    Base directory to 'lack.git' repo on the local host
   -f|--varsfile     File to read in to set script environment variables
   -s|--showvars     List variables set in the --project stanza
   -o|--output       Filename to write the initramfs image to
@@ -227,7 +228,7 @@ EOF
 ### BEGIN SCRIPT ###
 # run getopt
 TEMP=$(${GETOPT} -o hHenp:d:f:sb:o:qlkw: \
---long help,longhelp,examples,dry-run,project:,projectdir:,dir: \
+--long help,longhelp,examples,dry-run,lack-base:,project:,projectdir:,dir: \
 --long varsfile:,showvars,recipes:,recipies-dir:,output:,quiet,hardlink \
 --long keeplist,keepfiles,keep,workdir:,work: \
 -n "${SCRIPTNAME}" -- "$@")
@@ -271,6 +272,11 @@ while $TRUE; do
         -s|--showvars) # list variables after reading them in
             SHOWVARS=1
             shift
+            ;;
+        # LACK_BASE, path to lack.git directory
+        -l|--lack-base)
+            LACK_BASE=$2
+            shift 2
             ;;
         # path to recipes.git
         -r|--recipes|--recipes-dir)
