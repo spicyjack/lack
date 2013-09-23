@@ -11,7 +11,7 @@
 # Get support and more info about this script at:
 # https://github.com/spicyjack/lack
 # https://github.com/spicyjack/lack/issues
-# http://groups.google.com/group/linuxack|linuxack@googlegroups.com
+# https://groups.google.com/group/linuxack | linuxack@googlegroups.com
 
 # DO NOT CONTACT THE AUTHOR DIRECTLY; use the mailing list please
 
@@ -36,17 +36,18 @@ PROJECT_LIST="project-filelist.txt"
 LACK_WORK_DIR="/dev/shm"
 
 # external programs used
-TRUE=$(which true)
-GETOPT=$(which getopt)
-MV=$(which mv)
 CAT=$(which cat)
-RM=$(which rm)
-MKTEMP=$(which mktemp)
-GZIP=$(which gzip)
-SED=$(which sed)
-TOUCH=$(which touch)
 DATE=$(which date)
 RFC_2822_DATE=$(${DATE} --rfc-2822)
+DIRNAME=$(which dirname)
+GETOPT=$(which getopt)
+GZIP=$(which gzip)
+MKTEMP=$(which mktemp)
+MV=$(which mv)
+RM=$(which rm)
+SED=$(which sed)
+TRUE=$(which true)
+TOUCH=$(which touch)
 
 # helper functions
 
@@ -181,7 +182,7 @@ cat <<-EOF
     inside the script itself, or in an external file that gets sourced with
     --varsfile) in order to function correctly:
 
-    RECIPE_DIR
+    RECIPES_DIR
         the path containing the project files and recipe files; set globally
         above, but can be overridden on a per-project basis
     PROJECT_DIR: directory to look in for initramfs filelist, project
@@ -259,11 +260,6 @@ while $TRUE; do
             echo -n "Use '--longhelp' to see all help options, including "
             echo "environment variables "
             exit 0;;
-        -p|--project|--profile) # name of the project to use when
-            # creating an initramfs image
-            LACK_PROJECT_NAME=$2
-            shift 2
-            ;; # --project
         -n|--dry-run) # don't create the initramfs image, only filelists
             DRY_RUN=1
             shift
@@ -276,12 +272,17 @@ while $TRUE; do
             SHOWVARS=1
             shift
             ;;
+        # path to recipes.git
+        -r|--recipes|--recipes-dir)
+            RECIPES_DIR=$2
+            shift 2
+            ;;
         -b|--lackdir|--base)
             # base directory for projects, project files and recipes
             LACK_BASE=$2
             shift 2
             ;;
-        -d|--projectdir|--dir)
+        -p|--project|--projectdir)
             # project directory, or a directory located outside of base dir
             # above
             PROJECT_DIR=$2
@@ -329,51 +330,43 @@ if [ $SHOWVARS ]; then
     exit 0
 fi # if [ $SHOWVARS ]; then
 
-# can't set both $PROJECT and $PROJECT_DIR
-if [ "x$LACK_PROJECT_NAME" != "x" -a "x$PROJECT_DIR" != "x" ]; then
-    echo "ERROR: can't set --project and --projectdir at the same time"
-    exit 1
+# try and figure out where this script is located
+if [ "x$LACK_BASE" = "x" ]; then
+    SCRIPT_DIR=$(${DIRNAME} $0)
 fi
 
-# verify the build directory exists
-# the variable is hardcoded at the top of this script
-echo -n "- Checking for build base directory (${LACK_BASE}); "
-if [ ! -d $LACK_BASE ]; then
-    echo
-    echo "ERROR: build base directory doesn't exist"
-    echo "(${LACK_BASE})"
+# make sure we can reach the LACK_BASE directory, it's substituted in recipies
+echo -n "- Checking for LACK base directory; "
+if [ ! -d $SCRIPT_DIR/../initscripts ]; then
+    echo "missing!"
+    echo "ERROR: can't determine \$LACK_BASE directory"
+    exit 1
+else
+    LACK_BASE="${SCRIPT_DIR}/.."
+    echo "found! (LACK_BASE=${LACK_BASE})"
+fi
+
+# see if the project directory exists
+echo -n "- Checking for project directory; "
+if [ ! -d $PROJECT_DIR ]; then
+    echo "missing!"
+    echo "ERROR: --project specified, but directory does not exist"
+    echo "ERROR: checked directory: ${PROJECT_DIR}"
     exit 1
 fi
 echo "found!"
+echo "  -> Project directory: ${PROJECT_DIR}"
 
-# if the project directory was used, see if it exists
-if [ "x$PROJECT_DIR" != "x" ]; then
-    echo -n "- Checking for project directory; "
-
-    if [ ! -d $PROJECT_DIR ]; then
-        echo
-        echo "ERROR: --projectdir specified, but directory does not exist"
-        echo "ERROR: tested directory: ${PROJECT_DIR}"
-        exit 1
-    fi # if [ ! -d $PROJECT_DIR ]
-    echo "found!"
-    echo "  -> Project directory: ${PROJECT_DIR}"
-fi # if [ "x$PROJECT_DIR" != "x" ]
-
-# if the project name was used, see if it exists
-if [ "x$LACK_PROJECT_NAME" != "x" ]; then
-    echo -n "- Checking for project '${LACK_PROJECT_NAME}' in base dir; "
-    if [ ! -d $LACK_BASE/builds/$LACK_PROJECT_NAME ]; then
-        echo
-        echo "ERROR: --project specified, but project directory does not exist"
-        echo "ERROR: directory: ${LACK_BASE}/builds/${LACK_PROJECT_NAME}"
-        exit 1
-    fi # if [ ! -d $LACK_BASE/builds/$LACK_PROJECT_NAME ]
-    echo "found!"
-    # the project directory was passed in and it's valid
-    # set it
-    PROJECT_DIR=$LACK_BASE/builds/$LACK_PROJECT_NAME
+# see if the recipe directory exists
+echo -n "- Checking for recipe directory; "
+if [ ! -d $RECIPE_DIR ]; then
+    echo "missing!"
+    echo "ERROR: --recipes specified, but directory does not exist"
+    echo "ERROR: checked directory: ${RECIPE_DIR}"
+    exit 1
 fi
+echo "found!"
+echo "  -> Recipe directory: ${RECIPE_DIR}"
 
 # no sense in running if gen_init_cpio doesn't exist
 if [ ! $DRY_RUN ]; then
@@ -400,7 +393,7 @@ if [ ! $DRY_RUN ]; then
 fi # if [ ! $DRY_RUN ]; then
 
 # create a temp directory
-TEMP_DIR=$(${MKTEMP} -d ${LACK_WORK_DIR}/initramfs.XXXXX)
+TEMP_DIR=$(${MKTEMP} -d ${LACK_WORK_DIR}/lack_initramfs.XXXXX)
 echo "- Created temporary directory '${TEMP_DIR}'"
 
 ### EXPORTS
