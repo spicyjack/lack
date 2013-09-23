@@ -62,7 +62,6 @@ function set_vars {
         exit 1
     fi
 
-
     # verify a project name was used; we need one to know which initramfs
     # package file to go get
     if [ $VARSFILE ]; then
@@ -93,7 +92,7 @@ function set_vars {
         echo "ERROR: Project directory: $PROJECT_DIR"
         exit 1
     fi
-} # function set_vars
+}
 
 ## FUNC: check_exit_status
 ## ARG:  Returned exit status code of that function
@@ -111,7 +110,7 @@ function check_exit_status {
         echo "ERROR: '${STATUS_MSG}' returned an exit code of ${EXIT_STATUS}"
         exit 1
     fi # if [ $STATUS_CODE -gt 0 ]
-} # function check_exit_status
+}
 
 # cat the source file, filter it with sed, then append it to the destination
 function sedify ()
@@ -128,7 +127,7 @@ function sedify ()
         s!:TEMP_DIR:!${TEMP_DIR}!g;
         s!:LACK_WORK_DIR:!${LACK_WORK_DIR}!g;
         }" >> $DEST_FILE
-} # function sedify ()
+}
 
 function show_vars()
 {
@@ -139,7 +138,7 @@ function show_vars()
     echo "PROJECT_DIR=${PROJECT_DIR}"
     echo "RECPIES='${RECPIES}'"
     echo "OUTPUT_FILE=${OUTPUT_FILE}"
-} # function show_vars()
+}
 
 function show_help () {
 cat <<-EOF
@@ -174,7 +173,7 @@ cat <<-EOF
   Use '--examples' to see examples of script execution.
 
 EOF
-} # function show_help ()
+}
 
 function show_longhelp () {
 cat <<-EOF
@@ -210,7 +209,7 @@ cat <<-EOF
     OUTPUT_FILE:
         file to write the initramfs image to
 EOF
-} # function show_longhelp ()
+}
 
 function show_examples () {
 cat <<-EOF
@@ -233,7 +232,7 @@ cat <<-EOF
 
     Use '--longhelp' to see all help options, including environment variables
 EOF
-} # function show_examples ()
+}
 
 ### BEGIN SCRIPT ###
 # run getopt
@@ -395,16 +394,16 @@ if [ ! $DRY_RUN ]; then
         echo
         echo "Huh. gen_init_cpio is not executable (mode 755)"
         GENINITCPIO_ERROR=1
-    fi # if [ ! -x "/usr/src/linux/usr/gen_init_cpio" ]
+    fi
 
     if [ $GENINITCPIO_ERROR -eq 1 ]; then
         echo
         echo "  (Please check gen_init_cpio file in /usr/src/linux/usr)" >&2
         echo "Can't build initramfs image... Exiting." >&2
         exit 1
-    fi # if [ $GENINITCPIO_ERROR -eq 1 ]
+    fi
     echo "found!"
-fi # if [ ! $DRY_RUN ]; then
+fi
 
 # create a temp directory
 TEMP_DIR=$(${MKTEMP} -d ${LACK_WORK_DIR}/lack_initramfs.XXXXX)
@@ -442,7 +441,7 @@ else
     echo
     show_vars
     exit 1
-fi # if [ -n $OUTPUT_FILE ]
+fi
 
 # check that RECIPES is not zero length
 if [ -z "${RECIPES}" ]; then
@@ -477,7 +476,7 @@ do
             fi # if [ -z $KEEP_TEMP_DIR ]
             exit 1
         fi
-    fi # if [ -r $PROJECT_DIR/recipes/$RECIPE.txt ]
+    fi
     # then do some searching and replacing; write the output file to
     # FILELIST
     sedify $RECIPE_DIR/$RECIPE.txt $TEMP_DIR/$FILELIST
@@ -519,6 +518,7 @@ if [ $DRY_RUN ]; then
     echo "- Deleting $OUTPUT_FILE,"
     echo "  as --dry-run should not create this file"
     rm $OUTPUT_FILE
+    # FIXME what is this perl script for?
     PERL_SCRIPT=$(cat <<'EOPS'
         my $counter = 0;
         while ( <> ) {
@@ -545,8 +545,8 @@ if [ $DRY_RUN ]; then
             } else {
                 print qq(WARN: unknown filetype: ) . $line[0]
                     . qq(, line: $counter\n);
-            } # if ( $line[0] eq q(dir) )
-        } # while ( <> )
+            }
+        }
 EOPS)
     echo "Running perl script on $TEMP_DIR/$FILELIST"
     cat $TEMP_DIR/$FILELIST | perl -e "$PERL_SCRIPT"
@@ -563,15 +563,15 @@ else
     else
         echo "initramfs temporary directory is: ${TEMP_DIR}"
         echo "Please delete it manually"
-    fi # if [ -z $KEEP_TEMP_DIR ]; then
+    fi
     if [ $LACK_HARDLINK_INITRD -gt 0 ]; then
         echo "Hardlinking $OUTPUT_FILE to initrd file"
         if [ -r /boot/initrd-$KERNEL_VER.gz ]; then
             rm /boot/initrd-$KERNEL_VER.gz
-        fi #if [ -r /boot/initrd-$KERNEL_VER.gz ]
+        fi
         ln $OUTPUT_FILE /boot/initrd-$KERNEL_VER.gz
-    fi # if [ $LACK_HARDLINK_INITRD -gt 0 ]
-fi # if [ $DRY_RUN ];
+    fi
+fi
 
 # if we got here, everything worked
 exit 0
