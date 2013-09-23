@@ -183,8 +183,12 @@ cat <<-EOF
     inside the script itself, or in an external file that gets sourced with
     --varsfile) in order to function correctly:
 
+    LACK_BASE
+        The path containing the LACK tools scripts, config files, and
+        'initramfs' startup scripts; defaults to
+        '/home/lack/src/lack/lack.git'
     RECIPES_DIR
-        the path containing the project files and recipe files; set globally
+        The path containing the project files and recipe files; set globally
         above, but can be overridden on a per-project basis
     PROJECT_DIR: directory to look in for initramfs filelist, project
         configuration file, local recipes, and support scripts
@@ -209,17 +213,18 @@ cat <<-EOF
 
     Normal usage:
 
-    bash ${SCRIPTNAME} --recipes /path/to/recipes --project /path/to/project
+    bash ${SCRIPTNAME} --recipes /path/to/recipes \\
+        --project /path/to/project
 
     # Output all of the important environment variables for a profile; you
     # can edit these and then use them in place of a built-in profile;
 
-    bash ${SCRIPTNAME} --project /path/to/project --showvars \
+    bash ${SCRIPTNAME} --project /path/to/project --showvars \\
         > projectvars.txt
 
     # Now use edit this environment variables file, and then use it to
     # generate an initramfs image:
-    bash ${SCRIPTNAME} --varsfile projectvars.txt \
+    bash ${SCRIPTNAME} --varsfile projectvars.txt \\
         --nohardlink --keepfiles
 
 EOF
