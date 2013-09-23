@@ -169,6 +169,10 @@ cat <<-EOF
   --hardlink     Create hardlink from 'initrd' to initramfs file
   -k|--keep         Don't delete the created initramfs filelist/init.sh script
   -w|--work         Directory to use for working files (default: /dev/shm)
+
+  Use '--longhelp' to see more help options, including environment variables.
+  Use '--examples' to see examples of script execution.
+
 EOF
 } # function show_help ()
 
@@ -227,6 +231,7 @@ cat <<-EOF
     bash ${SCRIPTNAME} --varsfile projectvars.txt \\
         --nohardlink --keepfiles
 
+    Use '--longhelp' to see all help options, including environment variables
 EOF
 } # function show_examples ()
 
@@ -248,33 +253,33 @@ eval set -- "$TEMP"
 # getopts call(s) above
 while $TRUE; do
     case "$1" in
-        -h|--help) # show the script options
-            show_help # short options
-            echo
-            echo -n "Use '--longhelp' to see more help options, including "
-            echo "environment variables. "
-            echo "Use '--examples' to see examples of script execution"
-            echo
+        # show the script options
+        -h|--help)
+            # show short help
+            show_help
             exit 0;;
-        -H|--longhelp) # show the script options
+        # show *ALL* script options
+        -H|--longhelp)
             show_help # short options
             show_longhelp # environment variables
             show_examples # examples of script usage
             exit 0;;
-        -e|--examples) # show the script options
-            show_examples # short options
-            echo -n "Use '--longhelp' to see all help options, including "
-            echo "environment variables "
+        # show examples
+        -e|--examples)
+            show_examples
             exit 0;;
-        -n|--dry-run) # don't create the initramfs image, only filelists
+        # don't create the initramfs image, just generate filelists
+        -n|--dry-run)
             DRY_RUN=1
             shift
-            ;; # --dryrun
-        -f|--varsfile) # read in environment variables from this file
+            ;;
+        # read in environment variables from this file
+        -f|--varsfile)
             VARSFILE=$2
             shift 2
-            ;; # --verbose
-        -s|--showvars) # list variables after reading them in
+            ;;
+        # list variables after reading them in
+        -s|--showvars)
             SHOWVARS=1
             shift
             ;;
@@ -288,58 +293,56 @@ while $TRUE; do
             RECIPES_DIR=$2
             shift 2
             ;;
-        -b|--lackdir|--base)
-            # base directory for projects, project files and recipes
-            LACK_BASE=$2
-            shift 2
-            ;;
+        # project directory, with initramfs.cfg and local recipes
         -p|--project|--projectdir)
-            # project directory, or a directory located outside of base dir
-            # above
             PROJECT_DIR=$2
             shift 2
-            ;; # --projectdir
-        -o|--output) # filename to write the initramfs file to; defaults to
-            # /boot/initramfs-$KERNEL_VER.cpio.gz if not specified
+            ;;
+        # filename to write the initramfs file to; defaults to
+        # /boot/initramfs-$KERNEL_VER.cpio.gz if not specified
+        -o|--output)
             OUTPUT_FILE=$2
             export OUTPUT_FILE
             shift 2
-            ;; # --output
-        -q|--quiet) # don't output anything (unless there's an error)
+            ;;
+        # don't output anything (unless there's an error)
+        -q|--quiet)
             QUIET=0
             shift
-            ;; # --quiet
+            ;;
         # hardlink the new initramfs file to initrd for the
         # update-grub script to work properly
         --hardlink)
             LACK_HARDLINK_INITRD=1
             shift
-            ;; # --initrd
-        -k|--keepfiles|--keeplist|--keep) # keep the initramfs file list
+            ;;
+        # keep the initramfs file list
+        -k|--keepfiles|--keeplist|--keep)
             KEEP_TEMP_DIR=1
             shift
-            ;; # --keep
-        -w|--workdir|--work) # working directory; defaults to /tmp
+            ;;
+        # working directory; defaults to /tmp
+        -w|--workdir|--work)
             LACK_WORK_DIR=$2
             export LACK_WORK_DIR
             shift 2
-            ;; # --workdir
+            ;;
         --) shift
             break
-            ;; # --
+            ;;
         *) # we shouldn't get here; die gracefully
             echo "ERROR: unknown option '$1'" >&2
             echo "ERROR: use --help to see all script options" >&2
             exit 1
             ;;
-    esac # case "$1"
-done # while $TRUE
+    esac
+done
 
 # see if we just list variables and then exit
 if [ $SHOWVARS ]; then
     show_vars
     exit 0
-fi # if [ $SHOWVARS ]; then
+fi
 
 # try and figure out where this script is located
 if [ "x$LACK_BASE" = "x" ]; then
