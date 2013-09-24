@@ -56,9 +56,16 @@ source $LACK_FUNCTIONS
 $BB clear
 colorize_nl $S_INFO "=== Begin :PROJECT_NAME: /init script: PID is ${$} ==="
 
+# check for a request to debug
+#file_parse "/proc/cmdline" "DEBUG"
+#DEBUG=$PARSED
+
+colorize_nl $S_INFO "=== DEBUG environment variable currently: $DEBUG ==="
+sleep 5
+
 # are we debugging?
 if [ $DEBUG ]; then
-    colorize_nl $S_INFO "=== DEBUG environment variable currently: $DEBUG ==="
+    #colorize_nl $S_INFO "=== DEBUG environment variable currently: $DEBUG ==="
     # yep, we are;
     # set up enough of the environment (filesystems, mice, keyboards) so
     # that the user can respond to questions we ask of them :)
