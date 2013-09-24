@@ -172,7 +172,7 @@ function create_init_initramfs_script {
 ## DESC: creating the script and processing any variable substitutions
 function _create_init_script {
     local INIT_SCRIPT=$1
-    $CAT $BUILD_BASE/common/initscripts/$INIT_SCRIPT | $SED \
+    $CAT $BUILD_BASE/initscripts/$INIT_SCRIPT | $SED \
         "{
         s!:PROJECT_NAME:!${PROJECT_NAME}!g;
         s!:PROJECT_DIR:!${PROJECT_DIR}!g;
