@@ -136,7 +136,7 @@ function show_vars()
     echo "KERNEL_VER=${KERNEL_VER}"
     echo "LACK_PROJECT_NAME=${LACK_PROJECT_NAME}"
     echo "PROJECT_DIR=${PROJECT_DIR}"
-    echo "RECPIES='${RECPIES}'"
+    echo "RECPIES_DIR='${RECPIES_DIR}'"
     echo "OUTPUT_FILE=${OUTPUT_FILE}"
 }
 
@@ -238,7 +238,7 @@ EOF
 # run getopt
 TEMP=$(${GETOPT} -o hHenp:d:f:sb:o:qlkw: \
 --long help,longhelp,examples,dry-run,lack-base:,project:,projectdir:,dir: \
---long varsfile:,showvars,recipes:,recipies-dir:,output:,quiet,hardlink \
+--long varsfile:,showvars,recipes:,recipes-dir:,output:,quiet,hardlink \
 --long keeplist,keepfiles,keep,workdir:,work: \
 -n "${SCRIPTNAME}" -- "$@")
 check_exit_status $? $GETOPT
@@ -345,41 +345,54 @@ fi
 
 # try and figure out where this script is located
 if [ "x$LACK_BASE" = "x" ]; then
-    SCRIPT_DIR=$(${DIRNAME} $0)
+    LACK_DIR=$(${DIRNAME} $0)
 fi
 
 # make sure we can reach the LACK_BASE directory, it's substituted in recipies
 echo -n "- Checking for LACK base directory; "
-if [ ! -d $SCRIPT_DIR/../initscripts ]; then
+if [ ! -d ${LACK_BASE}/initscripts ]; then
     echo "missing!"
     echo "ERROR: can't determine \$LACK_BASE directory"
     exit 1
 else
-    LACK_BASE="${SCRIPT_DIR}/.."
+    #LACK_BASE="${SCRIPT_DIR}/.."
     echo "found! (LACK_BASE=${LACK_BASE})"
 fi
 
 # see if the project directory exists
 echo -n "- Checking for project directory; "
+if [ "x$PROJECT_DIR" = "x" ]; then
+    echo "--project switch not used/empty"
+    echo "ERROR: --project not specified"
+    exit 1
+fi
 if [ ! -d $PROJECT_DIR ]; then
-    echo "missing!"
+    echo "directory is missing!"
     echo "ERROR: --project specified, but directory does not exist"
     echo "ERROR: checked directory: ${PROJECT_DIR}"
     exit 1
 fi
-echo "found!"
+echo "found directory!"
+# remove trailing slash, if any
+TEMP_PROJECT_DIR=$(echo ${PROJECT_DIR} | sed 's!/$!!')
+PROJECT_DIR=${TEMP_PROJECT_DIR}
 echo "  -> Project directory: ${PROJECT_DIR}"
 
 # see if the recipe directory exists
-echo -n "- Checking for recipe directory; "
-if [ ! -d $RECIPE_DIR ]; then
-    echo "missing!"
-    echo "ERROR: --recipes specified, but directory does not exist"
-    echo "ERROR: checked directory: ${RECIPE_DIR}"
+echo -n "- Checking for recipes directory; "
+if [ "x$RECIPES_DIR" = "x" ]; then
+    echo "--recipes switch not used/empty"
+    echo "ERROR: --project not specified"
     exit 1
 fi
-echo "found!"
-echo "  -> Recipe directory: ${RECIPE_DIR}"
+if [ ! -d $RECIPES_DIR ]; then
+    echo "directory is missing!"
+    echo "ERROR: --recipes specified, but directory does not exist"
+    echo "ERROR: checked directory: ${RECIPES_DIR}"
+    exit 1
+fi
+echo "found directory!"
+echo "  -> Recipes directory: ${RECIPES_DIR}"
 
 # no sense in running if gen_init_cpio doesn't exist
 if [ ! $DRY_RUN ]; then
@@ -458,16 +471,21 @@ do
     # the check in $LACK_BASE will then be done
     if [ -r $PROJECT_DIR/recipes/$RECIPE.txt ]; then
         # project-specific recpie exists
-        RECIPE_DIR="$PROJECT_DIR/recipes"
+        FOUND_RECIPE_DIR="$PROJECT_DIR/recipes"
     else
-        if [ -r $LACK_BASE/recipes/$RECIPE.txt ]; then
+        if [ -r ${RECIPES_DIR}/$RECIPE.txt ]; then
             # recipe exists in LACK recipes directory
-            RECIPE_DIR="$LACK_BASE/recipes"
+            FOUND_RECIPE_DIR="${RECIPES_DIR}"
         else
             # nope; delete the output file and exit
             echo "ERROR: ${RECIPE}.txt file does not exist in"
-            echo "${LACK_BASE}/recipes (common) directory or"
+            echo "${RECIPES_DIR} (common) directory or"
             echo "${PROJECT_DIR}/recipes (project-specific) directory"
+            cd $RECIPES_DIR
+            RECIPES_GIT_BRANCH=$(git branch)
+            cd $OLDPWD
+            echo "Maybe you have the wrong recipes git branch checked out?"
+            echo "Common recipes current git branch: $RECIPES_GIT_BRANCH"
             echo "- Deleting output file ${OUTPUT_FILE}"
             rm $OUTPUT_FILE
             if [ -z $KEEP_TEMP_DIR ]; then
@@ -479,7 +497,7 @@ do
     fi
     # then do some searching and replacing; write the output file to
     # FILELIST
-    sedify $RECIPE_DIR/$RECIPE.txt $TEMP_DIR/$FILELIST
+    sedify $FOUND_RECIPE_DIR/$RECIPE.txt $TEMP_DIR/$FILELIST
 done
 
 # verify the initramfs recipe file exists
