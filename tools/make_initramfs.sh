@@ -356,7 +356,8 @@ if [ ! -d ${LACK_BASE}/initscripts ]; then
     exit 1
 else
     #LACK_BASE="${SCRIPT_DIR}/.."
-    echo "found! (LACK_BASE=${LACK_BASE})"
+    echo "found!"
+    echo "  -> LACK_BASE=${LACK_BASE}"
 fi
 
 # see if the project directory exists
@@ -372,7 +373,8 @@ if [ ! -d $PROJECT_DIR ]; then
     echo "ERROR: checked directory: ${PROJECT_DIR}"
     exit 1
 fi
-echo "found directory!"
+echo "found!"
+
 # remove trailing slash, if any
 TEMP_PROJECT_DIR=$(echo ${PROJECT_DIR} | sed 's!/$!!')
 PROJECT_DIR=${TEMP_PROJECT_DIR}
@@ -511,7 +513,7 @@ then
     exit 1
 fi
 echo "found!"
-echo "  -> ${TEMP_DIR}/${PROJECT_LIST}"
+echo "  -> Project filelist: ${TEMP_DIR}/${PROJECT_LIST}"
 
 # then grab the project specific file, which should have the kernel modules
 # and do some searching and replacing
