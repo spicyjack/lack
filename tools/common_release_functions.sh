@@ -162,7 +162,7 @@ function create_init_initramfs_script {
 
 ## FUNC: _create_init_script
 ## ARG:  path to the source init script
-## ENV:  BUILD_BASE - base directory for the LACK scripts
+## ENV:  LACK_BASE - base directory for the LACK scripts
 ## ENV:  PROJECT_DIR - base directory for the project
 ## ENV:  PROJECT_NAME - the name of the project
 ## ENV:  KERNEL_VER - kernel version, used for issue/syslinux screens
@@ -172,11 +172,11 @@ function create_init_initramfs_script {
 ## DESC: creating the script and processing any variable substitutions
 function _create_init_script {
     local INIT_SCRIPT=$1
-    $CAT $BUILD_BASE/initscripts/$INIT_SCRIPT | $SED \
+    $CAT $LACK_BASE/initscripts/$INIT_SCRIPT | $SED \
         "{
         s!:PROJECT_NAME:!${PROJECT_NAME}!g;
         s!:PROJECT_DIR:!${PROJECT_DIR}!g;
-        s!:BUILD_BASE:!${BUILD_BASE}!g;
+        s!:LACK_BASE:!${LACK_BASE}!g;
         s!:VERSION:!${KERNEL_VER}!g;
         }" >> $TEMP_DIR/init.sh
     check_exit_status $? "Creating the init script in TEMP_DIR"
