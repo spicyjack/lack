@@ -70,7 +70,7 @@ TRUE=$(which true)
 UNAME=$(which uname)
 
 # handy shortcuts using the above commands
-EPOCH_DATE_CMD="${DATE} +%s"
+EPOCH_DATE_CMD="${DATE} +%s.%N"
 SCRIPT_START=$(${EPOCH_DATE_CMD})
 
 
@@ -589,7 +589,7 @@ do
             say "- Processing filelist file: ${FILELIST_FILE}"
             if [ -s $FILELIST_FILE ]; then
                 warn "- Parsing: ${FILELIST_FILE}"
-                # FIXME 
+                # FIXME
                 # - this doesn't catch symlinks in filelist files
                 # - this also breaks if the source and destination files are
                 # different
@@ -637,7 +637,7 @@ do
                 FILELIST_HEADER_FLAG=1
             else
                 echo "# ${CURR_PKG} - ${PKG_VERSION}"
-            fi 
+            fi
         fi
 
         # PKG_CONTENTS should be a list of files, directories and/or symlinks
@@ -829,20 +829,27 @@ fi # if [ "x$SINGLE_OUTFILE" == "x" ]
 if [ "x$OUTPUT_OPT" = "xfilelist" ]; then
     # print the vim tag at the bottom so the recipes are formatted nicely
     # when you edit them
-    echo "# vi: set shiftwidth=4 tabstop=4 paste:"
+    echo "# vim: set filetype=config shiftwidth=2 tabstop=2 paste:"
 fi
 
 # calculate script execution time, and output pretty statistics
 SCRIPT_END=$(${EPOCH_DATE_CMD})
-SCRIPT_EXECUTION_SECS=$(( ${SCRIPT_END} - ${SCRIPT_START}))
-if [ $SCRIPT_EXECUTION_SECS -gt 60 ]; then
-    SCRIPT_EXECUTION_MINS=$(( $SCRIPT_EXECUTION_SECS / 60))
-    SCRIPT_EXECUTION_MOD=$(( $SCRIPT_EXECUTION_MINS * 60 ))
-    SCRIPT_EXECUTION_SECS=$(( $SCRIPT_EXECUTION_SECS - $SCRIPT_EXECUTION_MOD))
-    warn -n "- Total script execution time: ${SCRIPT_EXECUTION_MINS} minutes, "
-    warn "${SCRIPT_EXECUTION_SECS} seconds"
+warn "- Finished querying package system"
+EXECUTION_TIME=$( echo "${SCRIPT_END} - ${SCRIPT_START}" | bc )
+#warn "script start time: $SCRIPT_START"
+#warn "script end time: $SCRIPT_END"
+#warn "script execution time in seconds: $EXECUTION_TIME"
+EXECUTION_MINS=$( echo "scale=0; $EXECUTION_TIME/60" | bc)
+#warn "script execution time in minutes: $EXECUTION_MINS"
+if [ $EXECUTION_MINS -gt 60 ]; then
+    EXECUTION_MOD=$( echo "$EXECUTION_MINS * 60" | bc )
+    EXECUTION_SECS=$( echo "$EXECUTION_TIME - $EXECUTION_MOD" | bc )
+    TOTAL_TIME="- Total script execution time: "
+    TOTAL_TIME="${TOTAL_TIME} ${EXECUTION_MINS} minutes, "
+    TOTAL_TIME="${TOTAL_TIME} ${EXECUTION_SECS} seconds"
+    warn $TOTAL_TIME
 else
-    warn "- Total script execution time: ${SCRIPT_EXECUTION_SECS} seconds"
+    warn "- Total script execution time: 0${EXECUTION_TIME} seconds"
 fi
 
 # exit with the happy
