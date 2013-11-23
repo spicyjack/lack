@@ -12,17 +12,6 @@
 # script that generates either lists of files, or squashfs packages, based on
 # input from the system's packaging tools or a list of files
 
-# FIXME
-# - Test the behavior of squashfs when it finds an existing squashfs file;
-# does it append new files, even if they are the same as the
-# existing files in the squashfs archive?
-# - Creating the output squashfs filename is broken for non-dpkg lists of
-# files, as the version number of the package is not available, yet it's
-# encoded into the output filename
-# - add dedup'ing of files/directories by using some kind of cache mechanisim;
-# maybe some kind of dbm client, test to see if a specific line has already
-# been written to a dbm database, and skip outputting the line if it has
-
 # SCRIPT DESIGN
 # Inputs:
 # - one or more debian packages or gen_init_cpio filelists; multiple
