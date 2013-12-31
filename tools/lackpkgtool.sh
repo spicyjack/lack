@@ -217,7 +217,7 @@ function dump_filelist_header {
 # we know the name of the package.... generate a nicer header that includes
 # the current date and package name
 cat <<EOHD
-# name: ${PKG_NAME} - ${PKG_VERSION}
+# package name/version: ${PKG_NAME} / ${PKG_VERSION}
 # description: example package with comments
 # depends: _base otherpackage1 otherpackage2
 # helpcommand: /usr/bin/somebin --help
@@ -625,7 +625,7 @@ do
                 dump_filelist_header $CURR_PKG $PKG_VERSION
                 FILELIST_HEADER_FLAG=1
             else
-                echo "# ${CURR_PKG} - ${PKG_VERSION}"
+                echo "# package name/version: ${CURR_PKG} / ${PKG_VERSION}"
             fi
         fi
 
