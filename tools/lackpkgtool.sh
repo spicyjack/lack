@@ -199,14 +199,15 @@ function show_excludes {
 function check_excludes {
     local LINE=$1
 
+    say "- check_excludes: checking ${LINE}"
     # if a list of base directories to exclude was passed in, test with it
     if [ "x${BASE_DIR_EXCLUDES}" != x ]; then
-        say "- Checking base-dir excludes: ${LINE}"
+        say "- Checking base-dir excludes"
         local GREP_COUNT=$(echo ${BASE_DIR_EXCLUDES} | grep --count ${LINE})
         #say "- grep count is ${GREP_COUNT}"
         if [ $GREP_COUNT -gt 0 ];
         then
-            say "- Skipping ${LINE}"
+            say "- Matches contents of base-dir; skipping!"
             return 1
         fi
     fi
@@ -214,10 +215,11 @@ function check_excludes {
     # check the default list of excludes
     if [ "x${SKIP_EXCLUDES}" == x ]; then
         # run through the exclusions list
-        say "- Checking excludes: ${LINE}"
+        say "- Checking regex excludes"
         local GREP_COUNT=$(echo $LINE \
             | grep --count --extended-regexp "${EXCLUDES}")
         if [ ${GREP_COUNT} -gt 0 ]; then
+            say "- Matches contents of regex; skipping!"
             return 1
         fi
     fi
@@ -226,6 +228,7 @@ function check_excludes {
     if [ ! -e $LINE ]; then
         return 1
     fi
+    say "- No match, file will be included in filelist"
     return 0
 }
 
@@ -238,16 +241,11 @@ function dump_filelist_header {
 # we know the name of the package.... generate a nicer header that includes
 # the current date and package name
 cat <<EOHD
-# package name/version: ${PKG_NAME} / ${PKG_VERSION}
-# description: example package with comments
-# depends: _base otherpackage1 otherpackage2
-# helpcommand: /usr/bin/somebin --help
-# versioncommand: /usr/bin/somebin --version
-# examplecommand: /usr/bin/somebin -x -y -z 10
-#
 # dir <name> <mode> <uid> <gid>
 # file <name> <source> <mode> <uid> <gid>
 # slink <new name> <original file> <mode> <uid> <gid>
+#
+# package name/version: ${PKG_NAME} / ${PKG_VERSION}
 #
 EOHD
 }
@@ -700,7 +698,9 @@ do
                 dump_filelist_header $CURR_PKG $PKG_VERSION
                 FILELIST_HEADER_FLAG=1
             else
+                echo "#"
                 echo "# package name/version: ${CURR_PKG} / ${PKG_VERSION}"
+                echo "#"
             fi
         fi
 
@@ -915,7 +915,8 @@ if [ $EXECUTION_MINS -gt 60 ]; then
     TOTAL_TIME="${TOTAL_TIME} ${EXECUTION_SECS} seconds"
     warn $TOTAL_TIME
 else
-    warn "- Total script execution time: 0${EXECUTION_TIME} seconds"
+    DISPLAY_TIME=$(echo ${EXECUTION_TIME} | sed 's/\./0./')
+    warn "- Total script execution time: ${DISPLAY_TIME} seconds"
 fi
 
 # exit with the happy
